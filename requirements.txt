@@ -1,2 +1,4 @@
 openpyxl
 INEGIpy
+pyxlsb
+xlsxwriter
