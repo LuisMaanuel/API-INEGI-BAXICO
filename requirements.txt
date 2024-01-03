@@ -2,3 +2,4 @@ openpyxl
 INEGIpy
 pyxlsb
 xlsxwriter
+st-pages
