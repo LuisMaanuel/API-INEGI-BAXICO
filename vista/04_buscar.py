@@ -52,7 +52,7 @@ def colorear_celda(value, keyword):
       
 if keyword != "":
   
-  data_keyword: pd.DataFrame = buscar_rutas("aluminio")
+  data_keyword: pd.DataFrame = buscar_rutas(keyword)
 
   # 2) Despues por nivel
   rutas_separadas: pd.DataFrame = data_keyword["Variables"].str.split('>', expand=True)
