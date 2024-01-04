@@ -1,5 +1,7 @@
+import pickle
+import pandas as pd
 import streamlit as st
-from st_pages import Page, show_pages, add_page_title
+from st_pages import Page, show_pages
 
 # Specify what pages should be shown in the sidebar, and what their titles and icons
 # should be
@@ -7,21 +9,39 @@ show_pages(
     [
         Page("app.py", "Introducción", "🏠"),
         Page("vista/02_obtener_series_inegi.py", "Obtener datos INEGI", "📉"),
-        Page("vista/03_obtener_series_banxico.py", "Obtener datos BANXICO", ":chart_with_upwards_trend:"),
+        #Page("vista/03_obtener_series_banxico.py", "Obtener datos BANXICO", ":chart_with_upwards_trend:"),
         Page("vista/04_buscar.py", "Buscar rutas", "🔎")
     ]
 )
 
-# Optional -- adds the title and icon to the current page
-#add_page_title()
+@st.cache_data
+def convert_df(df):
+    # IMPORTANT: Cache the conversion to prevent computation on every rerun
+    return df.to_csv().encode('utf-8')
+
+@st.cache_data
+def load_data(url):
+    df = pd.read_excel(url)
+    return df
+
+muestra_rutas: pd.DataFrame = load_data("./catalogo/muestra5-rutas.xlsx")
+muestra_claves: pd.DataFrame = load_data("./catalogo/muestra5-claves.xlsx")
+
+# Opciones para leer el catalogo
+# 1) Leyendo el excel por primera vez y despues serializarlo
+#catalogo_inegi: pd.DataFrame = load_data(r"./catalogo/catalogoCompletoINEGI.xlsx")
 
 
-import pandas as pd
-import streamlit as st
-from io import BytesIO
+# 2) Abrir el archivo en modo lectura binaria y guardarlo en cache por si lo vuelve abrir el enlace
+@st.cache_data
+def load_data_objeto(url):
+    with open(url, 'rb') as f:
+        # Cargar el objeto desde el archivo
+        catalogo_inegi = pickle.load(f)
+    return catalogo_inegi
 
-muestra_rutas: pd.DataFrame = pd.read_excel("./catalogo/muestra5-rutas.xlsx")
-muestra_claves: pd.DataFrame = pd.read_excel("./catalogo/muestra5-claves.xlsx")
+# Ventakas de hacerlo de esta forma, la primera vez siempre correra rapido
+catalogo_inegi = load_data_objeto('./catalogo/catalogoINEGI.pkl')
 
 # Titulo principal y pequeña explicación
 st.title(":red[Modelos Internos]")
@@ -54,26 +74,13 @@ Para ampliar el conocimineto de todas las variables que son posibles buscar, se 
 """
 st.write(text)
 
-def convertir_df_a_excel(df):
-    output = BytesIO()
-    writer = pd.ExcelWriter(output, engine='xlsxwriter')
-    df.to_excel(writer, index=True, sheet_name='Sheet1')
-    workbook = writer.book
-    worksheet = writer.sheets['Sheet1']
-    format1 = workbook.add_format({'num_format': '0.00'}) 
-    worksheet.set_column('A:A', None, format1)  
-    writer.close()
-    processed_data = output.getvalue()
-    return processed_data
-
-catalogo_inegi = pd.read_excel(r"./catalogo/catalogoCompletoINEGI.xlsx")
-excel_final = convertir_df_a_excel(catalogo_inegi)
-
+csv = convert_df(catalogo_inegi)
 st.subheader("Descargar Catalogos", divider="gray")
 st.download_button(
-                label='Descargar catalogo INEGI 📥',
-                data=excel_final,
-                file_name= 'catalogo-inegi.xlsx'
+                label='Descargar catalogo INEGI como CSV 📥',
+                data=csv,
+                file_name= 'catalogo-inegi.csv',
+                mime='text/csv'
                 )
 
 text = '''

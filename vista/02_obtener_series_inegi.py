@@ -1,13 +1,33 @@
-from pyxlsb import open_workbook as open_xlsb
-from INEGIpy import Indicadores
-from io import BytesIO
-
-import streamlit as st 
+import pickle
 import pandas as pd
+import streamlit as st 
+from INEGIpy import Indicadores
 
-#/Users/guillermo/Documents/trabajo/API-INEGI-BANXICO/vista/catalogoCompletoINEGI.xlsx
-catalogo_path: str = r"./catalogo/catalogoCompletoINEGI.xlsx"
-catalogo: pd.DataFrame = pd.read_excel(catalogo_path)
+
+@st.cache_data
+def convert_df(df):
+    # IMPORTANT: Cache the conversion to prevent computation on every rerun
+    return df.to_csv().encode('utf-8')
+
+@st.cache_data
+def load_data(url):
+    df = pd.read_excel(url)
+    return df
+
+@st.cache_data
+def load_data_objeto(url):
+    with open(url, 'rb') as f:
+        # Cargar el objeto desde el archivo
+        catalogo_inegi = pickle.load(f)
+    return catalogo_inegi
+
+# 1) La primera vez tardara, las siguientes seran muy veloces
+#catalogo_path: str = r"./catalogo/catalogoCompletoINEGI.xlsx"
+#catalogo: pd.DataFrame = load_data(catalogo_path)
+
+# 2) La primera vez siempre correra rapido, las siguientes seran muy veloces
+catalogo: pd.DataFrame = load_data_objeto('./catalogo/catalogoINEGI.pkl')
+
 
 def construir_catalogo(formato: str):
   if formato.strip() == "Rutas":
@@ -24,18 +44,19 @@ def obtener_serie(ruta_archivo: str, formato:str, token:str = "f6a7b69c-5c48-bf0
   
   # Se instancia la interfaz que se counicara con INEGI
   inegi = Indicadores(token)  
-
+  variables_df = pd.DataFrame({"Mensaje": ["No entro en ninguno de los condicionales programadas (if) reportar"]})
   if formato == "Rutas":
     #Para cada variable tendremos que sacar su clave y nombre de la variable
     claves_variables =  variables_usuario.apply(lambda x: catalogo_se[x])
     nombres_variables = variables_usuario.apply(lambda x: x.split(">")[-1])
-
+    nombres_variables = [str(clave) + nombre for clave, nombre in zip(claves_variables, nombres_variables)]
     # Se obtiene la serie a partir de la API
     variables_df = inegi.obtener_df(indicadores=claves_variables, nombres=nombres_variables)
   
   elif formato == "Claves":
     claves_variables =  variables_usuario
     nombres_variables = variables_usuario.apply(lambda x: catalogo_se[x].split(">")[-1])
+    nombres_variables = [str(clave) + nombre for clave, nombre in zip(claves_variables, nombres_variables)]
     variables_df = inegi.obtener_df(indicadores=claves_variables, nombres=nombres_variables)
   return variables_df
 
@@ -47,9 +68,10 @@ st.write("Aqui se obtendra las series de Inegi")
 # Configuración inicial
 st.subheader("Configuración inicial", divider="green")
 token = st.text_input('Escribir token', placeholder='Ej. f6a7b69c-5c48-bf0c-b191-5ca98c6a6cc0')
-token = 'f6a7b69c-5c48-bf0c-b191-5ca98c6a6cc0' if not token else token
-
+token = 'c64be54e-1842-acb9-0843-baad4ab4aa56' if not token else token
 st.write("Token escrito: ", token)
+
+st.markdown("Si no se tiene token generarlo en: https://www.inegi.org.mx/app/desarrolladores/generatoken/Usuarios/token_Verify")
 
 formato_excel = st.radio(
     "Seleccionar formato",
@@ -77,32 +99,20 @@ if uploaded_file is not None:
       st.write(f"Resumen de los datos")
       st.write(df)
       mensaje_estado = "Se obtuvieron con éxito :) ✅"
-   except:
-      mensaje_estado = "Hugo un error, verifique sus datos :( ❌"
+   except Exception as e:
+      st.write(e)
+      mensaje_estado = "Hubo un error, verifique sus datos :( ❌"
    st.write(mensaje_estado)
+      
+   st.subheader("Descargar variables", divider="green")
+   csv = convert_df(df)
+   st.download_button(
+                    label='Descargar variables como CSV 📥',
+                    data=csv,
+                    file_name= 'variables-usuario-inegi.csv',
+                    mime='text/csv'
+                    )
    
-   # # Descargar las series
-   def convertir_df_a_excel(df):
-      output = BytesIO()
-      writer = pd.ExcelWriter(output, engine='xlsxwriter')
-      #df.set_index(pd.to_datetime(df.index.get_level_values("fechas")),inplace=True, drop=True)
-      df.to_excel(writer, index=True, sheet_name='Sheet1')
-      workbook = writer.book
-      worksheet = writer.sheets['Sheet1']
-      #format1 = workbook.add_format({'num_format': '0.00'}) 
-      #worksheet.set_column('A:A', None, format1)  
-      writer.close()
-      processed_data = output.getvalue()
-      return processed_data
-   
-   # excel_final = convertir_df_a_excel(df)
 
-   # st.subheader("Descargar variables", divider="green")
-   
-   # st.download_button(
-   #                    label='Descargar series en Excel📥',
-   #                    data=excel_final,
-   #                    file_name= 'variables-usuario.xlsx'
-   #                    )
 
 
