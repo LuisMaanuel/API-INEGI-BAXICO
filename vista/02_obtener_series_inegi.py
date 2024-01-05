@@ -2,7 +2,7 @@ import pickle
 import pandas as pd
 import streamlit as st 
 from INEGIpy import Indicadores
-
+from io import BytesIO
 
 @st.cache_data
 def convert_df(df):
@@ -83,6 +83,7 @@ st.write("Tu seleccionaste:", formato_excel)
 # Seleecion de archivos
 st.subheader("Cargar archivos", divider="green")
 uploaded_file = st.file_uploader("Escoger un archivo")
+st.write("Archivo que seleccionaste: ", "" if uploaded_file is None else uploaded_file.name)
 
 if uploaded_file is not None:
    mensaje_estado = ""
@@ -105,13 +106,27 @@ if uploaded_file is not None:
    st.write(mensaje_estado)
       
    st.subheader("Descargar variables", divider="green")
-   csv = convert_df(df)
+  #  csv = convert_df(df)
+  #  st.download_button(
+  #                   label='Descargar variables como CSV 📥',
+  #                   data=csv,
+  #                   file_name= 'variables-usuario-inegi.csv',
+  #                   mime='text/csv'
+  #                   )
+   
+   # Crear un archivo Excel en BytesIO
+   excel_file = BytesIO()
+   df.to_excel(excel_file, index=True, engine='xlsxwriter')
+   excel_file.seek(0)
+   # Descargar el archivo Excel
    st.download_button(
-                    label='Descargar variables como CSV 📥',
-                    data=csv,
-                    file_name= 'variables-usuario-inegi.csv',
-                    mime='text/csv'
-                    )
+    label="Descargar variables Excel 📥",
+    data=excel_file,
+    file_name='variables_usuario_inegi.xlsx',
+    key='download_button'
+    )
+# Reiniciamos ambiente
+uploaded_file = None
    
 
 

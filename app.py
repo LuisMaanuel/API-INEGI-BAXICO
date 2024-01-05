@@ -2,6 +2,7 @@ import pickle
 import pandas as pd
 import streamlit as st
 from st_pages import Page, show_pages
+from io import BytesIO
 
 # Specify what pages should be shown in the sidebar, and what their titles and icons
 # should be
@@ -44,7 +45,7 @@ def load_data_objeto(url):
 catalogo_inegi = load_data_objeto('./catalogo/catalogoINEGI.pkl')
 
 # Titulo principal y pequeña explicación
-st.title(":red[Modelos Internos]")
+st.title(":red[Dirección de Metodologías y Modelos Riesgos]")
 st.header("API de :green[INEGI] y :blue[BANXICO]")
 text = '''
 Con esta interfaz se podrá obtener información de variables economicas de INEGI y BANXICO de una manera automatizada, optimizando la busqueda de las variables en sus sitios de internet. Con esto se busca ahorrar tiempo en las busquedas de series economicas.
@@ -54,14 +55,14 @@ Para el uso de la aplicación se debe tener una lista de variables a buscar de l
 
 st.markdown(text)
 
-st.subheader("Estructura por rutas")
+st.subheader("Busqueda por rutas")
 text = """
 Para obtener informacion de las variables con esta estructura debe indicarse la ruta que se debe seguir para obtener la variable y asi sucesivamente para cada variables. Ejemplo:
 """
 st.write(text)
 st.write(muestra_rutas)
 
-st.subheader("Estructura por claves")
+st.subheader("Busqueda por claves")
 text = """
 Para obtener informacion de las variables con esta estructura debe indicar sólo la clave de las variables a buscar. Ejemplo:
 """
@@ -74,14 +75,34 @@ Para ampliar el conocimineto de todas las variables que son posibles buscar, se 
 """
 st.write(text)
 
-csv = convert_df(catalogo_inegi)
-st.subheader("Descargar Catalogos", divider="gray")
+# csv = convert_df(catalogo_inegi)
+# st.subheader("Descargar Catalogos", divider="gray")
+# st.download_button(
+#                 label='Descargar catalogo INEGI como CSV 📥',
+#                 data=csv,
+#                 file_name= 'catalogo-inegi.csv',
+#                 mime='text/csv'
+#                 )
+
+@st.cache_data
+def convert_df_to_excel(df):
+    # IMPORTANT: Cache the conversion to prevent computation on every rerun
+    excel_file = BytesIO()
+    catalogo_inegi.to_excel(excel_file, index=False, engine='xlsxwriter')
+    excel_file.seek(0)
+    return excel_file
+
+excel = convert_df_to_excel(catalogo_inegi)
+
+# Descargar el archivo Excel
 st.download_button(
-                label='Descargar catalogo INEGI como CSV 📥',
-                data=csv,
-                file_name= 'catalogo-inegi.csv',
-                mime='text/csv'
-                )
+label="Descargar catalogo INEGI Excel 📥",
+data=excel,
+file_name='catalogo_inegi.xlsx',
+key='download_button'
+)
+
+
 
 text = '''
 Adional, si se desea buscar por palabras en particulas del conjunto de variables para encontrar las rutas de manera más efectiva, hemos proporcionado la seccion de "Buscar rutas 🔎".
