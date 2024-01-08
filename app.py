@@ -46,16 +46,28 @@ catalogo_inegi = load_data_objeto('./catalogo/catalogoINEGI.pkl')
 
 # Titulo principal y pequeña explicación
 st.title(":red[Dirección de Metodologías y Modelos Riesgos]")
+text = """
+Para el desarrollo de diversos proyectos se requieré información macroeconómica que emiten diversas entidades como
+el Instituto Nacional de Estadística y Geografía (INEGI) y el Banco de México (BANXiCO). Ante la necesidad de poder consultar información de manera rápida y eficiente se propuso crear una interfaz para la recolección de información de manera automatizada.
+"""
+
+st.write(text)
+
 st.header("API de :green[INEGI] y :blue[BANXICO]")
 text = '''
-Con esta interfaz se podrá obtener información de variables economicas de INEGI y BANXICO de una manera automatizada, optimizando la busqueda de las variables en sus sitios de internet. Con esto se busca ahorrar tiempo en las busquedas de series economicas.
+A través de la interfaz se podrá obtener información de variables economicas de INEGI y BANXICO, optimizando la busqueda de las variables de sus sitios de internet. Con esto se busca ahorrar tiempo en las busquedas de series economicas y automatizar el proceso.
 
-Para el uso de la aplicación se debe tener una lista de variables a buscar de los sitios de Inegi o Banxico. Debe estar guardadas en un archivo de trabajo de Excel y deben seguir el formato que se describe a continuación. 
+La interfaz hace uso de las API's(Application Programming Interface) las cuales se conectan con INEGI y BANXICO para extraer la información, estas API's son proporcionadas por los mismo sitios, por lo que la extracción de informacion es confiable y segura.
 '''
 
 st.markdown(text)
 
-st.subheader("Proporción de indicadores")
+st.subheader("Proporción de indicadores recolectados")
+
+text ="""
+Se creó un catálogo con todos los indicadores que se pudieron recolectar de cada uno de los sitios. A continuación se mostrará el total de indicadores por categoría de nuestro catálogo que podrá ser descargado en la parte de abajo.
+"""
+st.write(text)
 
 # Calcular las frecuencias
 catalogo_inegi.rename(columns={'Nivel1': "Categoria"}, inplace=True)
@@ -63,6 +75,10 @@ frecuencias = catalogo_inegi['Categoria'].value_counts().sort_index()
 frecuencias.name = "Total de variables"
 st.write(frecuencias)
 
+
+text = """Para el uso de la aplicación se debe tener una lista de variables a buscar de los sitios de INEGI o BANXICO. Debe estar guardadas en un archivo de trabajo de Excel y deben seguir al menos algunos de los formatos especificados a continuación. """
+
+st.write(text)
 
 st.subheader("Busqueda por rutas")
 text = """
@@ -79,8 +95,9 @@ st.write(text)
 st.write(muestra_claves)
 
 
+st.subheader("Catálogo de INEGI")
 text = """
-Para ampliar el conocimineto de todas las variables que son posibles buscar, se proporciona un catalogo con las variables que se tienen registradas en nuestra aplicación de los sitios de INEGI y BANXICO.
+Dejamos a tu disposición un catálogo de todos los indicadores que recolectamos con la ruta de cada variable con su respectiva clave unica con la finalidad que puede ser más facil estructurar sus archivos con los formatos especificados. 
 """
 st.write(text)
 
@@ -105,7 +122,7 @@ excel = convert_df_to_excel(catalogo_inegi)
 
 # Descargar el archivo Excel
 st.download_button(
-label="Descargar catalogo INEGI Excel 📥",
+label="Descargar catálogo INEGI Excel 📥",
 data=excel,
 file_name='catalogo_inegi.xlsx',
 key='download_button'
@@ -114,6 +131,6 @@ key='download_button'
 
 
 text = '''
-Adional, si se desea buscar por palabras en particulas del conjunto de variables para encontrar las rutas de manera más efectiva, hemos proporcionado la seccion de "Buscar rutas 🔎".
+Adicional, hemos proporcionado una seccion llamada "Buscar rutas 🔎" para encontrar las rutas de indicadores a través de palabras claves.
 '''
 st.write(text)

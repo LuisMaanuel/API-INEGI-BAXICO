@@ -343,10 +343,14 @@ def obtener_serie(ruta_archivo: str, formato:str, token:str = "f6a7b69c-5c48-bf0
     nombres_variables = variables_usuario.apply(lambda x: catalogo_se[x].split(">")[-1])
     nombres_variables = [str(clave) + nombre for clave, nombre in zip(claves_variables, nombres_variables)]
     
+    # Convertir todo cadena
+    claves_variables = claves_variables.astype(str)
+
+    claves_variables = claves_variables.tolist()
     # Quitamos duplicados
     claves_variables = list(set(claves_variables))
     nombres_variables = list(set(nombres_variables))
-
+    
     variables_df = inegi.obtener_df(indicadores=claves_variables, nombres=nombres_variables)
   return variables_df
 
