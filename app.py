@@ -48,7 +48,7 @@ catalogo_inegi = load_data_objeto('./catalogo/catalogoINEGI.pkl')
 st.title(":red[Dirección de Metodologías y Modelos Riesgos]")
 text = """
 Para el desarrollo de diversos proyectos se requieré información macroeconómica que emiten diversas entidades como
-el Instituto Nacional de Estadística y Geografía (INEGI) y el Banco de México (BANXiCO). Ante la necesidad de poder consultar información de manera rápida y eficiente se propuso crear una interfaz para la recolección de información de manera automatizada.
+el Instituto Nacional de Estadística y Geografía (INEGI) y el Banco de México (BANXICO). Ante la necesidad de poder consultar información de manera rápida y eficiente se propuso crear una interfaz para la recolección de información de manera automatizada.
 """
 
 st.write(text)
