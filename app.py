@@ -55,6 +55,15 @@ Para el uso de la aplicación se debe tener una lista de variables a buscar de l
 
 st.markdown(text)
 
+st.subheader("Proporción de indicadores")
+
+# Calcular las frecuencias
+catalogo_inegi.rename(columns={'Nivel1': "Categoria"}, inplace=True)
+frecuencias = catalogo_inegi['Categoria'].value_counts().sort_index()
+frecuencias.name = "Total de variables"
+st.write(frecuencias)
+
+
 st.subheader("Busqueda por rutas")
 text = """
 Para obtener informacion de las variables con esta estructura debe indicarse la ruta que se debe seguir para obtener la variable y asi sucesivamente para cada variables. Ejemplo:
