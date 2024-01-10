@@ -3,3 +3,5 @@ INEGIpy
 pyxlsb
 xlsxwriter
 st-pages
+sie-banxico
+plotly

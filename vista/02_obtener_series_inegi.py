@@ -8,6 +8,9 @@ from numpy import nan
 import warnings
 import requests
 import json
+from datetime import datetime
+import plotly.express as px
+import plotly.io as pio
 
 
 @st.cache_data
@@ -16,7 +19,7 @@ def convert_df(df):
     return df.to_csv().encode('utf-8')
 
 @st.cache_data
-def load_data(url):
+def load_excel(url):
     df = pd.read_excel(url)
     return df
 
@@ -291,7 +294,7 @@ class Indicadores:
 
 # 1) La primera vez tardara, las siguientes seran muy veloces
 #catalogo_path: str = r"./catalogo/catalogoCompletoINEGI.xlsx"
-#catalogo: pd.DataFrame = load_data(catalogo_path)
+#catalogo: pd.DataFrame = load_excel(catalogo_path)
 
 # 2) La primera vez siempre correra rapido, las siguientes seran muy veloces
 catalogo: pd.DataFrame = load_data_objeto('./catalogo/catalogoINEGI.pkl')
@@ -355,8 +358,41 @@ def obtener_serie(ruta_archivo: str, formato:str, token:str = "f6a7b69c-5c48-bf0
   return variables_df
 
 
+
+# ----------------------------------- Interfaz ---------------------------------------
+  
+with st.sidebar:
+    st.write("Ejemplos de rutas: ")
+    muestra_rutas: pd.DataFrame = load_excel("./pruebas/inegi-muestra-5rutas.xlsx")   
+    # Crear un archivo Excel en BytesIO
+    excel_file = BytesIO()
+    muestra_rutas.to_excel(excel_file, index=True, engine='xlsxwriter')
+    excel_file.seek(0)
+    # Descargar el archivo Excel
+    st.download_button(
+        label="inegi-muestra-5rutas.xlsx",
+        data=excel_file,
+        file_name='inegi-muestra-5rutas.xlsx',
+        key='download_button_r'
+    )
+
+with st.sidebar:
+    st.write("Ejemplos de claves: ")
+    muestra_claves: pd.DataFrame = load_excel("./pruebas/inegi-muestra-5claves.xlsx")   
+    # Crear un archivo Excel en BytesIO
+    excel_file = BytesIO()
+    muestra_claves.to_excel(excel_file, index=True, engine='xlsxwriter')
+    excel_file.seek(0)
+    # Descargar el archivo Excel
+    st.download_button(
+        label="inegi-muestra-5claves.xlsx",
+        data=excel_file,
+        file_name='inegi-muestra-5claves.xlsx',
+        key='download_button_c'
+    )
+
 # Titulo principal y pequeña explicación
-st.title("Obtener datos :green[INEGI] :chart_with_downwards_trend:")
+st.title("Obtener datos :green[INEGI] 📊")
 st.write("Aqui se obtendra las series de Inegi")
 
 # Configuración inicial
@@ -367,13 +403,22 @@ st.write("Token escrito: ", token)
 
 st.markdown("Si no se tiene token generarlo en: https://www.inegi.org.mx/app/desarrolladores/generatoken/Usuarios/token_Verify")
 
-formato_excel = st.radio(
-    "Seleccionar formato",
-    ["Rutas", "Claves"],
-    captions = ["Ej. Manufactura > extracción > ... ", "802342"])
+col1, col2 = st.columns(2)
+with col1:
+    formato_excel = st.radio(
+        "Seleccionar formato",
+        ["Rutas", "Claves"],
+        captions = ["Ej. Manufactura > extracción > ... ", "802342"])
+    st.write("Tu seleccionaste:", formato_excel)
+with col2:
+    st.write("(Campos opcionales)")
+    fecha_inicio = st.date_input("Fecha de inicio", value=None, min_value=datetime(1990, 1, 1), format="DD/MM/YYYY")
+    st.write('Tu fecha escrita fue:', fecha_inicio)
+    
+    fecha_fin = st.date_input("Fecha final", value=datetime.now(), min_value=datetime(1990, 1, 1), format="DD/MM/YYYY")
+    st.write('Tu fecha escrita fue:', fecha_fin)
 
-st.write("Tu seleccionaste:", formato_excel)
-
+st.markdown('_Si no se especifica ninguna fecha por defecto se obtiene todo el historial._')
 # Seleecion de archivos
 st.subheader("Cargar archivos", divider="green")
 uploaded_file = st.file_uploader("Escoger un archivo")
@@ -391,6 +436,18 @@ if uploaded_file is not None:
       df = obtener_serie(uploaded_file, formato_excel, token)
       #[my_bar.progress(percent_complete + 1, text=progress_text) for percent_complete in range(50, 100)]
       
+      # Aquii es donde haremos el corte
+      if fecha_inicio is not None:
+        # Convertir la serie de índices a tipo fecha
+        df.index = pd.to_datetime(df.index)
+
+        # Convertir el objeto de tipo date a datetime
+        fecha_inicio = datetime.combine(fecha_inicio, datetime.min.time())
+        fecha_fin = datetime.combine(fecha_fin, datetime.min.time())
+
+        # Filtrar el DataFrame para obtener solo las filas dentro del intervalo de fechas
+        df = df.loc[(df.index >= fecha_inicio) & (df.index <= fecha_fin)]
+
       st.write(f"Resumen de los datos")
       st.write(df)
       mensaje_estado = "Se obtuvieron con éxito :) ✅"
@@ -398,15 +455,39 @@ if uploaded_file is not None:
       st.write(e)
       mensaje_estado = "Hubo un error, verifique sus datos :( ❌"
    st.write(mensaje_estado)
-      
+   
+   st.subheader("Visualización", divider="green")
+   # Selección de la variable
+   selected_variable = st.selectbox('Selecciona la variable a graficar:', df.columns)
+   # Crear y mostrar la gráfica de líneas
+   df_sin_nans = df[selected_variable].dropna()
+   #st.line_chart(data=df_sin_nans, y=selected_variable, height=450)
+   fig = px.line(df_sin_nans, y=selected_variable, title=" ".join(selected_variable.split(" ")[1:]))
+  #  fig.update_layout(
+  #   title_x=0.1,  # Establecer la posición x del título al 50% del gráfico (centrado)
+  #   title_y=0.9   # Establecer la posición y del título (ajustar según sea necesario)
+  #   )
+   st.plotly_chart(fig)
+
+   # Dash
+   df_dash = pd.DataFrame(
+    {
+              "Variable": df.columns,                            
+              "Historia": [(df[col].dropna()).tolist() for col in df.columns],
+          }
+      )
+   st.dataframe(
+    df_dash,
+    column_config={
+        "Variable": "Nombre de la variable",
+        "Historia": st.column_config.LineChartColumn(
+            "Historia"
+        ),
+    },
+    hide_index=True,
+    )
+   
    st.subheader("Descargar variables", divider="green")
-  #  csv = convert_df(df)
-  #  st.download_button(
-  #                   label='Descargar variables como CSV 📥',
-  #                   data=csv,
-  #                   file_name= 'variables-usuario-inegi.csv',
-  #                   mime='text/csv'
-  #                   )
    
    # Crear un archivo Excel en BytesIO
    excel_file = BytesIO()

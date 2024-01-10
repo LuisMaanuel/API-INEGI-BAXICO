@@ -9,8 +9,8 @@ from io import BytesIO
 show_pages(
     [
         Page("app.py", "Introducción", "🏠"),
-        Page("vista/02_obtener_series_inegi.py", "Obtener datos INEGI", "📉"),
-        #Page("vista/03_obtener_series_banxico.py", "Obtener datos BANXICO", ":chart_with_upwards_trend:"),
+        Page("vista/02_obtener_series_inegi.py", "Obtener datos INEGI", "📗"),
+        Page("vista/03_obtener_series_banxico.py", "Obtener datos BANXICO", "📘"),
         Page("vista/04_buscar.py", "Buscar rutas", "🔎")
     ]
 )
@@ -25,8 +25,8 @@ def load_data(url):
     df = pd.read_excel(url)
     return df
 
-muestra_rutas: pd.DataFrame = load_data("./catalogo/muestra5-rutas.xlsx")
-muestra_claves: pd.DataFrame = load_data("./catalogo/muestra5-claves.xlsx")
+muestra_rutas: pd.DataFrame = load_data("./pruebas/inegi-muestra-5rutas.xlsx")
+muestra_claves: pd.DataFrame = load_data("./pruebas/inegi-muestra-5claves.xlsx")
 
 # Opciones para leer el catalogo
 # 1) Leyendo el excel por primera vez y despues serializarlo
