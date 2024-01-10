@@ -103,7 +103,7 @@ with st.sidebar:
     muestra_rutas: pd.DataFrame = load_excel("./pruebas/banxico-muestra-5rutas.xlsx")   
     # Crear un archivo Excel en BytesIO
     excel_file = BytesIO()
-    muestra_rutas.to_excel(excel_file, index=True, engine='xlsxwriter')
+    muestra_rutas.to_excel(excel_file, index=False, engine='xlsxwriter')
     excel_file.seek(0)
     # Descargar el archivo Excel
     st.download_button(
@@ -118,7 +118,7 @@ with st.sidebar:
     muestra_claves: pd.DataFrame = load_excel("./pruebas/banxico-muestra-5claves.xlsx")   
     # Crear un archivo Excel en BytesIO
     excel_file = BytesIO()
-    muestra_claves.to_excel(excel_file, index=True, engine='xlsxwriter')
+    muestra_claves.to_excel(excel_file, index=False, engine='xlsxwriter')
     excel_file.seek(0)
     # Descargar el archivo Excel
     st.download_button(
