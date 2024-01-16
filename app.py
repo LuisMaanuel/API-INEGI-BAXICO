@@ -124,20 +124,20 @@ with tab3_ban:
     st.write(three_nivels_ban)
 
 
-text = """Para el uso de la aplicación se debe tener una lista de variables a buscar de los sitios de INEGI o BANXICO. Debe estar guardadas en un archivo de trabajo de Excel y deben seguir al menos algunos de los formatos especificados a continuación. """
+text = """Para el uso de la extracción de la información a través de esta interfaz web se debe tener una lista de variables a buscar de los sitios de INEGI o BANXICO. Esta lista debe estar guardada en un archivo de trabajo de Excel y debe seguir al menos alguno de los formatos especificados a continuación. """
 
 st.write(text)
 
 st.subheader("Búsqueda por rutas")
 text = """
-Para obtener informacion de las variables con esta estructura debe indicarse la ruta que se debe seguir para obtener la variable y asi sucesivamente para cada variables. Ejemplo:
+Para obtener información de las variables con esta estructura debe indicarse la ruta que se debe seguir para obtener la variable y así sucesivamente para cada variables. Ejemplo:
 """
 st.write(text)
 st.write(muestra_rutas)
 
 st.subheader("Búsqueda por claves")
 text = """
-Para obtener informacion de las variables con esta estructura debe indicar sólo la clave de las variables a buscar. Ejemplo:
+Para obtener información de las variables con esta estructura debe indicar sólo la clave de las variables a buscar. Ejemplo:
 """
 st.write(text)
 st.write(muestra_claves)
@@ -187,6 +187,6 @@ key='download_button2'
 
 st.divider()
 text = '''
-Adicional, hemos proporcionado una seccion llamada "Buscar rutas 🔎" para encontrar las rutas de indicadores a través de palabras claves.
+Adicional, hemos proporcionado una sección llamada "Buscar rutas 🔎" para encontrar las rutas de indicadores a través de palabras claves.
 '''
 st.write(text)
