@@ -12,6 +12,9 @@ from datetime import datetime
 import plotly.express as px
 import plotly.io as pio
 
+from openpyxl import Workbook
+from openpyxl.drawing.image import Image
+
 
 @st.cache_data
 def convert_df(df):
@@ -136,23 +139,23 @@ class Indicadores:
                 'valor':[float(serie[i]['OBS_VALUE']) if (serie[i]['OBS_VALUE'] is not None) and (serie[i]['OBS_VALUE'] != "") else nan for i in range(obs_totales)]}
         df = pd.DataFrame.from_dict(dic) 
         frecuencia = data['FREQ']
-        factor, period = self.__frecuancias_dict[banco].get(frecuencia) # factor que multiplica el periodo para pasar a fecha y periodo de pd
-        if factor: 
-            try: 
-                cambio_fechas = lambda x: '/'.join(x.split('/')[:-1] + [str(int(x.split('/')[-1])*factor)])
-                df.fechas = df.fechas.apply(cambio_fechas)
-                df.set_index(pd.to_datetime(df.fechas),inplace=True, drop=True)
-                df = df.drop(['fechas'],axis=1)
-                if period == 'SM': df.index = df.index + pd.offsets.SemiMonthBegin()
-            except: 
-                df.fechas = dic['fechas']
-                df.set_index(df.fechas,inplace=True, drop=True)
-                df = df.drop(['fechas'],axis=1)
-                warnings.warn('No se pudo interpretar la fecha correctamente por lo que el índice no es tipo DateTime')
-        else:
-            df.set_index(df.fechas,inplace=True, drop=True)
-            df = df.drop(['fechas'],axis=1)
-            warnings.warn('No se pudo interpretar la fecha correctamente por lo que el índice no es tipo DateTime')
+        # factor, period = self.__frecuancias_dict[banco].get(frecuencia) # factor que multiplica el periodo para pasar a fecha y periodo de pd
+        # if factor: 
+        #     try: 
+        #         cambio_fechas = lambda x: '/'.join(x.split('/')[:-1] + [str(int(x.split('/')[-1])*factor)])
+        #         df.fechas = df.fechas.apply(cambio_fechas)
+        #         df.set_index(pd.to_datetime(df.fechas),inplace=True, drop=True)
+        #         df = df.drop(['fechas'],axis=1)
+        #         if period == 'SM': df.index = df.index + pd.offsets.SemiMonthBegin()
+        #     except: 
+        #         df.fechas = dic['fechas']
+        #         df.set_index(df.fechas,inplace=True, drop=True)
+        #         df = df.drop(['fechas'],axis=1)
+        #         warnings.warn('No se pudo interpretar la fecha correctamente por lo que el índice no es tipo DateTime')
+        # else:
+        df.set_index(df.fechas,inplace=True, drop=True)
+        df = df.drop(['fechas'],axis=1)
+            #warnings.warn('No se pudo interpretar la fecha correctamente por lo que el índice no es tipo DateTime')
 
         # construcción de metadatos
         data['BANCO'] = banco
@@ -298,7 +301,7 @@ class Indicadores:
 
 # 2) La primera vez siempre correra rapido, las siguientes seran muy veloces
 catalogo: pd.DataFrame = load_data_objeto('./catalogo/catalogoINEGI.pkl')
-
+rutas_variables_usuario = None
 
 def construir_catalogo(formato: str):
   if formato.strip() == "Rutas":
@@ -310,6 +313,7 @@ def construir_catalogo(formato: str):
 
 
 def obtener_serie(ruta_archivo: str, formato:str, token:str = "f6a7b69c-5c48-bf0c-b191-5ca98c6a6cc0"):
+  global rutas_variables_usuario
   # Tomamos siempre la primera columna
   variables_usuario: pd.Series = pd.read_excel(ruta_archivo).iloc[:,0]
   #st.write(variables_usuario.iloc[0])
@@ -334,12 +338,15 @@ def obtener_serie(ruta_archivo: str, formato:str, token:str = "f6a7b69c-5c48-bf0
     # Hace unico los nombres, pero no esta excento que la ruta la pongan dos veces
     nombres_variables = [str(clave) + nombre for clave, nombre in zip(claves_variables, nombres_variables)]
     
+    # ISSUE: Verficar si el usuario no puso rutas repetidas
     # Mayor verificacion, quitar los duplicados de la lista si es que existen
-    claves_variables = list(set(claves_variables))
-    nombres_variables = list(set(nombres_variables))
+    #claves_variables = list(set(claves_variables))
+    #nombres_variables = list(set(nombres_variables))
 
     # Se obtiene la serie a partir de la API
     variables_df = inegi.obtener_df(indicadores=claves_variables, nombres=nombres_variables)
+    
+    rutas_variables_usuario = pd.DataFrame({"RutaCompleta": variables_usuario, "NombreVariable": nombres_variables})
   
   elif formato == "Claves":
     claves_variables =  variables_usuario
@@ -355,6 +362,9 @@ def obtener_serie(ruta_archivo: str, formato:str, token:str = "f6a7b69c-5c48-bf0
     nombres_variables = list(set(nombres_variables))
     
     variables_df = inegi.obtener_df(indicadores=claves_variables, nombres=nombres_variables)
+    
+    rutas_variables_usuario = variables_usuario.apply(lambda x: catalogo_se[x])
+
   return variables_df
 
 
@@ -421,7 +431,7 @@ with col2:
 st.markdown('_Si no se especifica ninguna fecha por defecto se obtiene todo el historial._')
 # Seleecion de archivos
 st.subheader("Cargar archivos", divider="green")
-uploaded_file = st.file_uploader("Escoger un archivo")
+uploaded_file = st.file_uploader("Escoger un archivo (Sólo se admite archivos de Excel .xlsx)")
 st.write("Archivo que seleccionaste: ", "" if uploaded_file is None else uploaded_file.name)
 
 if uploaded_file is not None:
@@ -457,23 +467,57 @@ if uploaded_file is not None:
    st.write(mensaje_estado)
    
    st.subheader("Visualización", divider="green")
+
+   #st.write(rutas_variables_usuario)
    # Selección de la variable
    selected_variable = st.selectbox('Selecciona la variable a graficar:', df.columns)
+   
+   ruta_completa_variable: str = rutas_variables_usuario[rutas_variables_usuario["NombreVariable"] == selected_variable]["RutaCompleta"].iloc[0]
+   
+   tmp:list = ruta_completa_variable.split(">")[-3:-1] if len(ruta_completa_variable.split(">")[:-1]) > 3 else ruta_completa_variable.split(">")[:-1]
+
+   ruta_completa_variable = ">".join(tmp)
+   
+   #st.write(ruta_completa_variable)
    # Crear y mostrar la gráfica de líneas
    df_sin_nans = df[selected_variable].dropna()
    #st.line_chart(data=df_sin_nans, y=selected_variable, height=450)
-   fig = px.line(df_sin_nans, y=selected_variable, title=" ".join(selected_variable.split(" ")[1:]))
-  #  fig.update_layout(
-  #   title_x=0.1,  # Establecer la posición x del título al 50% del gráfico (centrado)
-  #   title_y=0.9   # Establecer la posición y del título (ajustar según sea necesario)
-  #   )
+   fig = px.line(df_sin_nans, y=selected_variable) #title=" ".join(selected_variable.split(" ")[1:]))
+   # Configurar el diseño (layout)
+   fig.update_layout(
+    title=ruta_completa_variable,  # Título principal
+    xaxis_title='Eje X',  # Título del eje X
+    yaxis_title='Eje Y',  # Título del eje Y
+    title_font=dict(size=14),  # Tamaño de fuente del título principal
+    title_x=0.06,  # Posición del título principal en el eje X (0.5 = centrado)
+    title_y=0.95,  # Posición del título principal en el eje Y
+    #title_text=ruta_completa_variable,  # Texto del subtítulo   
+)
+   
+
+   # Agregar el subtítulo mediante annotations
+   fig.update_layout(
+    annotations=[
+        dict(
+            x=0.0,  # Posición en el eje X (0.5 = centrado)
+            y=1.2,  # Posición en el eje Y (negativo para colocarlo debajo del título principal)
+            xref="paper",
+            yref="paper",
+            text="Últimos dos framentos de su ruta:",
+            showarrow=False,
+            font=dict(size=14)  # Tamaño de fuente del subtítulo
+        )
+    ]
+)
    st.plotly_chart(fig)
 
    # Dash
    df_dash = pd.DataFrame(
     {
+              
               "Variable": df.columns,                            
               "Historia": [(df[col].dropna()).tolist() for col in df.columns],
+              "Ruta": rutas_variables_usuario["RutaCompleta"],
           }
       )
    st.dataframe(
@@ -488,10 +532,33 @@ if uploaded_file is not None:
     )
    
    st.subheader("Descargar variables", divider="green")
-   
-   # Crear un archivo Excel en BytesIO
+   # Crearemos un archivo de Excel con BytesIO (Para cargarlo en memoria)
    excel_file = BytesIO()
-   df.to_excel(excel_file, index=True, engine='xlsxwriter')
+   
+   # Obtenemos todas sus graficas
+   imgs_bytes = []
+   for i, col in enumerate(df.columns):       
+    fig_ = px.line(df[col].dropna(), y=col,  title=" ".join(col.split(" ")[1:]))
+    imgs_bytes.append(BytesIO())
+    fig_.write_image(imgs_bytes[i], format='png')
+
+  # Crear un objeto pd.ExcelWriter que escribe en el objeto BytesIO
+   with pd.ExcelWriter(excel_file, engine='xlsxwriter') as writer:
+  #     # Agregar el DataFrame a la primera hoja
+      df.to_excel(writer, sheet_name='Datos', index=True)
+      # Agregamos imagenes
+      for i, img_bytes1 in enumerate(imgs_bytes):    
+        df_img1 = pd.DataFrame({'image': [img_bytes1.getvalue()]})
+        df_img1.to_excel(writer, sheet_name='Graficas', index=False, header=False, startrow=i*15, startcol=0)
+        
+        workbook = writer.book
+        worksheet = writer.sheets['Graficas']
+        # Crear objetos Image para cada gráfica y agregarlos a la hoja
+        worksheet.insert_image(f'A{1 if i==0 else i*26}', 'grafica_linea_{i}.png', {'image_data': img_bytes1})
+
+  #     pio.write_excel(fig, excel_file, sheet_name='graficas')
+   
+   #df.to_excel(excel_file, index=True, engine='xlsxwriter')
    excel_file.seek(0)
    # Descargar el archivo Excel
    st.download_button(

@@ -31,23 +31,6 @@ def eliminar_puntuacion(texto_minuscula):
 st.title("Buscar rutas 🔎")
 st.write("A partir de una palabra buscaremos todas rutas donde aparecen.")
 
-texto = """
-
-__Guía de uso__
-
-- Se puede utilizar una palabra para la busqueda.
-
-> Ej. Desempleo
-
-Esto buscará todas las rutas con la palabra desempleo.
-
-- Se puede usar con más de una palabra utilizando el separador coma(,).
-    
- > Ej. Desempleo, mujeres
-
-Esto buscará todas las rutas donde se encuentre desempleo y muejeres.
-"""
-
 # Configuración inicial
 st.subheader("Configuración inicial", divider="blue")
 
@@ -69,7 +52,22 @@ pd.set_option("styler.render.max_elements", catalogo.shape[0]*10)
 
 keyword = st.text_input('Escribir palabra', placeholder='Ej. aluminio')
 st.write("Palabra escrita:", keyword)
-st.write(texto)
+
+
+with st.expander("__Ver guía de uso (opcional)__"):
+   texto = """
+- Se puede utilizar una palabra para la busqueda.
+
+> Ej. Desempleo
+
+Esto buscará todas las rutas con la palabra desempleo.
+
+- Se puede usar con más de una palabra utilizando el separador coma(,).
+    
+ > Ej. Desempleo, mujeres
+
+Esto buscará todas las rutas donde se encuentre desempleo y muejeres."""
+   st.write(texto)
 
 
 # Le damos un formato uniforme

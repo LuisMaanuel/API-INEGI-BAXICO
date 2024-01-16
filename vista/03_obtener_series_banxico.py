@@ -29,6 +29,7 @@ def load_data_objeto(url):
 
 # 2) La primera vez siempre correra rapido, las siguientes seran muy veloces
 catalogo: pd.DataFrame = load_data_objeto('./catalogo/catalogoBANXICO.pkl')
+rutas_variables_usuario = None
 
 def construir_catalogo(formato: str):
   if formato.strip() == "Rutas":
@@ -39,6 +40,7 @@ def construir_catalogo(formato: str):
   return tmp 
 
 def obtener_serie(ruta_archivo: str, formato:str, token:str = ""):
+  global rutas_variables_usuario
   # Tomamos siempre la primera columna
   variables_usuario: pd.Series = pd.read_excel(ruta_archivo).iloc[:,0]
   # Las claves son cadenas
@@ -64,22 +66,26 @@ def obtener_serie(ruta_archivo: str, formato:str, token:str = ""):
     nombres_variables = variables_usuario.apply(lambda x: x.split(">")[-1])
 
   elif formato == "Claves":
-
+    # En esta parte se trata cuando se tiene la misma clave con diferentes rutas
     claves_variables =  variables_usuario
-    nombres_variables = variables_usuario.apply(lambda x: catalogo_se[x].split(">")[-1])
-
+    #nombres_variables = variables_usuario.apply(lambda x: catalogo_se[x].split(">")[-1])
+    
+    # Conservaremos el mismo nombre de la variable
+    nombres_variables = claves_variables
+  
   # Convertir todo cadena
   claves_variables = claves_variables.astype(str)
 
   # Hace unico los nombres, pero no esta excento que la ruta la pongan dos veces
-  nombres_variables = [str(clave) + " " + nombre for clave, nombre in zip(claves_variables, nombres_variables)]
+  #nombres_variables = [str(clave) + " " + nombre for clave, nombre in zip(claves_variables, nombres_variables)]
   
   # Mayor verificacion, quitar los duplicados de la lista si es que existen
-  claves_variables = list(set(claves_variables))
-  nombres_variables = list(set(nombres_variables))
+  #claves_variables = list(set(claves_variables))
+  #nombres_variables = list(set(nombres_variables))
+  rutas_variables_usuario = pd.DataFrame({"RutaCompleta": variables_usuario, "NombreVariable": nombres_variables})
   
   # Uso de la API de BANXICO
-  api = SIEBanxico(token = token, id_series = claves_variables, language = 'en')
+  api = SIEBanxico(token = token, id_series = claves_variables.tolist(), language = 'en')
   data: dict = api.get_timeseries()
 
   # Ahora que tenemos la serie tenemos que prevenir aquellas series que no contienen datos por x razon
@@ -94,6 +100,10 @@ def obtener_serie(ruta_archivo: str, formato:str, token:str = ""):
   data_df = pd.json_normalize(data["bmx"]["series"], record_path='datos', meta = ['idSerie', 'titulo'])
   # Si no aparecen en la serie es porque para esas fechas no se encuntran valores
   df = data_df.pivot(index='fecha', columns='titulo', values='dato')
+
+  # Limpieza del dataframe caso partircula banxico
+  for columna in df.columns:
+    df[columna].replace("N/E", np.nan, inplace=True)
   return df
 
 
@@ -162,7 +172,7 @@ st.markdown('_Si no se especifica ninguna fecha por defecto se obtiene todo el h
 
 # Seleecion de archivos
 st.subheader("Cargar archivos", divider="blue")
-uploaded_file = st.file_uploader("Escoger un archivo")
+uploaded_file = st.file_uploader("Escoger un archivo (Sólo se admite archivos de Excel .xlsx)")
 st.write("Archivo que seleccionaste: ", "" if uploaded_file is None else uploaded_file.name)
 
 if uploaded_file is not None:
@@ -201,14 +211,37 @@ if uploaded_file is not None:
    
    # Selección de la variable
    selected_variable = st.selectbox('Selecciona la variable a graficar:', df.columns)
+   
+   ruta_completa_variable: str = rutas_variables_usuario[rutas_variables_usuario["NombreVariable"] == selected_variable]["RutaCompleta"].iloc[0]
+
    # Crear y mostrar la gráfica de líneas
    df_sin_nans = df[selected_variable].dropna()
    #st.line_chart(data=df_sin_nans, y=selected_variable, height=450)
-   fig = px.line(df_sin_nans, y=selected_variable, title=" ".join(selected_variable.split(" ")[1:]))
-  #  fig.update_layout(
-  #   title_x=0.1,  # Establecer la posición x del título al 50% del gráfico (centrado)
-  #   title_y=0.9   # Establecer la posición y del título (ajustar según sea necesario)
-  #   )
+   fig = px.line(df_sin_nans, y=selected_variable)#, title=" ".join(selected_variable.split(" ")[1:]))
+   fig.update_layout(
+    title=ruta_completa_variable,  # Título principal
+    xaxis_title='Eje X',  # Título del eje X
+    yaxis_title='Eje Y',  # Título del eje Y
+    title_font=dict(size=14),  # Tamaño de fuente del título principal
+    title_x=0.06,  # Posición del título principal en el eje X (0.5 = centrado)
+    title_y=0.95,  # Posición del título principal en el eje Y
+    #title_text=ruta_completa_variable,  # Texto del subtítulo   
+)
+   # Agregar el subtítulo mediante annotations
+   if formato_excel=="Rutas":
+      fig.update_layout(
+      annotations=[
+          dict(
+              x=0.0,  # Posición en el eje X (0.5 = centrado)
+              y=1.2,  # Posición en el eje Y (negativo para colocarlo debajo del título principal)
+              xref="paper",
+              yref="paper",
+              text="Últimos dos framentos de su ruta:",
+              showarrow=False,
+              font=dict(size=14)  # Tamaño de fuente del subtítulo
+          )
+      ]
+  )
    st.plotly_chart(fig)
 
    # Dash
@@ -216,6 +249,7 @@ if uploaded_file is not None:
     {
               "Variable": df.columns,                            
               "Historia": [(df[col].dropna()).tolist() for col in df.columns],
+              "Ruta": rutas_variables_usuario["RutaCompleta"],
           }
       )
    st.dataframe(
@@ -232,7 +266,27 @@ if uploaded_file is not None:
    st.subheader("Descargar variables", divider="blue")
    # Crear un archivo Excel en BytesIO
    excel_file = BytesIO()
-   df.to_excel(excel_file, index=True, engine='xlsxwriter')
+   imgs_bytes = []
+   # Obtenemos todas las graficas
+   for i, col in enumerate(df.columns):       
+    fig_ = px.line(df[col].dropna(), y=col,  title=" ".join(col.split(" ")[1:]))
+    imgs_bytes.append(BytesIO())
+    fig_.write_image(imgs_bytes[i], format='png')
+   
+   with pd.ExcelWriter(excel_file, engine='xlsxwriter') as writer:
+  #     # Agregar el DataFrame a la primera hoja
+      df.to_excel(writer, sheet_name='Datos', index=True)
+      # Agregamos imagenes
+      for i, img_bytes1 in enumerate(imgs_bytes):    
+        df_img1 = pd.DataFrame({'image': [img_bytes1.getvalue()]})
+        df_img1.to_excel(writer, sheet_name='Graficas', index=False, header=False, startrow=i*15, startcol=0)
+        
+        workbook = writer.book
+        worksheet = writer.sheets['Graficas']
+        # Crear objetos Image para cada gráfica y agregarlos a la hoja
+        worksheet.insert_image(f'A{1 if i==0 else i*26}', 'grafica_linea_{i}.png', {'image_data': img_bytes1})
+   
+   #df.to_excel(excel_file, index=True, engine='xlsxwriter')
    excel_file.seek(0)
    # Descargar el archivo Excel
    st.download_button(
