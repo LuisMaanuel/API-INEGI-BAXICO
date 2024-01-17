@@ -344,7 +344,7 @@ def obtener_serie(ruta_archivo: str, formato:str, token:str = "f6a7b69c-5c48-bf0
     #nombres_variables = list(set(nombres_variables))
 
     # Se obtiene la serie a partir de la API
-    variables_df = inegi.obtener_df(indicadores=claves_variables, nombres=nombres_variables)
+    variables_df = inegi.obtener_df(indicadores=claves_variables, nombres=nombres_variables, banco="BIE")
     
     rutas_variables_usuario = pd.DataFrame({"RutaCompleta": variables_usuario, "NombreVariable": nombres_variables})
   
@@ -361,9 +361,9 @@ def obtener_serie(ruta_archivo: str, formato:str, token:str = "f6a7b69c-5c48-bf0
     claves_variables = list(set(claves_variables))
     nombres_variables = list(set(nombres_variables))
     
-    variables_df = inegi.obtener_df(indicadores=claves_variables, nombres=nombres_variables)
+    variables_df = inegi.obtener_df(indicadores=claves_variables, nombres=nombres_variables, banco="BIE")
     
-    rutas_variables_usuario = variables_usuario.apply(lambda x: catalogo_se[x])
+    rutas_variables_usuario = pd.DataFrame({"RutaCompleta": variables_usuario.apply(lambda x: catalogo_se[x]), "NombreVariable": nombres_variables})
 
   return variables_df
 
