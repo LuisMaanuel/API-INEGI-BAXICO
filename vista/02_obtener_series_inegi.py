@@ -313,7 +313,7 @@ def construir_catalogo(formato: str):
 
 
 def obtener_serie(ruta_archivo: str, formato:str, token:str = "f6a7b69c-5c48-bf0c-b191-5ca98c6a6cc0"):
-  global rutas_variables_usuario
+  global rutas_variables_usuario 
   # Tomamos siempre la primera columna
   variables_usuario: pd.Series = pd.read_excel(ruta_archivo).iloc[:,0]
   #st.write(variables_usuario.iloc[0])
@@ -325,11 +325,29 @@ def obtener_serie(ruta_archivo: str, formato:str, token:str = "f6a7b69c-5c48-bf0
   variables_df = pd.DataFrame({"Mensaje": ["No entro en ninguno de los condicionales programadas (if) reportar"]})
   if formato == "Rutas":
     #Para cada variable tendremos que sacar su clave y nombre de la variable
-    
+    # Filtramos aquellas variables que son validas-------------------
+    variables_usuario_ = variables_usuario[variables_usuario.isin(catalogo_se.index)]
+    if len(variables_usuario_) != len(variables_usuario):
+       col1, col2 = st.columns(2)
+       with col1:
+          st.write(f"Claves que no se puedieron encontrar: {len(variables_usuario)-len(variables_usuario_)}")
+       with col2:          
+          excel_file = BytesIO()
+          no_encontradas = variables_usuario[-variables_usuario.isin(catalogo_se.index)]
+          no_encontradas.to_excel(excel_file, index=False, engine='xlsxwriter')
+          excel_file.seek(0)
+          # Descargar el archivo Excel
+          st.download_button(
+              label="Variables no encontradas 📥",
+              data=excel_file,
+              file_name='variables_no_encontradas.xlsx',
+              key='download_button_nofind'
+          )
+
     # En el caso que haya más de dos claves se seleciona la longitud maxima (SOLUCION PROVISIONAL)
-    claves_variables =  variables_usuario.apply(lambda x: max(catalogo_se[x]) if type(catalogo_se[x]) is not np.int64 else catalogo_se[x])
+    claves_variables =  variables_usuario_.apply(lambda x: max(catalogo_se[x]) if type(catalogo_se[x]) is not np.int64 else catalogo_se[x])
     #st.write(claves_variables)
-    nombres_variables = variables_usuario.apply(lambda x: x.split(">")[-1])
+    nombres_variables = variables_usuario_.apply(lambda x: x.split(">")[-1])
     #st.write(nombres_variables)
 
     # Convertir todo cadena
@@ -342,28 +360,53 @@ def obtener_serie(ruta_archivo: str, formato:str, token:str = "f6a7b69c-5c48-bf0
     # Mayor verificacion, quitar los duplicados de la lista si es que existen
     #claves_variables = list(set(claves_variables))
     #nombres_variables = list(set(nombres_variables))
-
-    # Se obtiene la serie a partir de la API
-    variables_df = inegi.obtener_df(indicadores=claves_variables, nombres=nombres_variables, banco="BIE")
     
-    rutas_variables_usuario = pd.DataFrame({"RutaCompleta": variables_usuario, "NombreVariable": nombres_variables})
+    # Se obtiene la serie a partir de la API
+    variables_df = inegi.obtener_df(indicadores=claves_variables.tolist(), nombres=nombres_variables, banco="BIE")
+    
+    rutas_variables_usuario = pd.DataFrame({"RutaCompleta": variables_usuario_, "NombreVariable": nombres_variables})
   
   elif formato == "Claves":
     claves_variables =  variables_usuario
-    nombres_variables = variables_usuario.apply(lambda x: catalogo_se[x].split(">")[-1])
-    nombres_variables = [str(clave) + nombre for clave, nombre in zip(claves_variables, nombres_variables)]
+    # st.write(claves_variables.isin(catalogo_se.index))
     
+    # Filtramos aquellas variables que son validas-------------------
+    claves_variables = claves_variables[claves_variables.isin(catalogo_se.index)]
+    if len(claves_variables) != len(variables_usuario):
+       col1, col2 = st.columns(2)
+       with col1:
+          st.write(f"Claves que no se puedieron encontrar: {len(variables_usuario)-len(claves_variables)}")
+       with col2:          
+          excel_file = BytesIO()
+          no_encontradas = variables_usuario[-variables_usuario.isin(catalogo_se.index)]
+          no_encontradas.to_excel(excel_file, index=False, engine='xlsxwriter')
+          excel_file.seek(0)
+          # Descargar el archivo Excel
+          st.download_button(
+              label="Variables no encontradas 📥",
+              data=excel_file,
+              file_name='variables_no_encontradas.xlsx',
+              key='download_button_nofind_'
+          )
+
+    nombres_variables = claves_variables.apply(lambda x: catalogo_se[x].split(">")[-1])
+    nombres_variables = [str(clave) + nombre for clave, nombre in zip(claves_variables, nombres_variables)]
+    rutas_variables_usuario = pd.DataFrame({"RutaCompleta": claves_variables.apply(lambda x: catalogo_se[x]), "NombreVariable": nombres_variables})
+
     # Convertir todo cadena
     claves_variables = claves_variables.astype(str)
-
     claves_variables = claves_variables.tolist()
     # Quitamos duplicados
-    claves_variables = list(set(claves_variables))
-    nombres_variables = list(set(nombres_variables))
+    # claves_variables = list(set(claves_variables))
+    # nombres_variables = list(set(nombres_variables))
     
+    # for clave_, nombre_ in claves_variables, nombres_variables:
+    #    print(clave_, nombre_)
     variables_df = inegi.obtener_df(indicadores=claves_variables, nombres=nombres_variables, banco="BIE")
+      #  st.write(variables_df)
+    # variables_df = inegi.obtener_df(indicadores=claves_variables, nombres=nombres_variables, banco="BIE")
     
-    rutas_variables_usuario = pd.DataFrame({"RutaCompleta": variables_usuario.apply(lambda x: catalogo_se[x]), "NombreVariable": nombres_variables})
+    
 
   return variables_df
 
@@ -457,13 +500,12 @@ if uploaded_file is not None:
 
         # Filtrar el DataFrame para obtener solo las filas dentro del intervalo de fechas
         df = df.loc[(df.index >= fecha_inicio) & (df.index <= fecha_fin)]
-
       st.write(f"Resumen de los datos")
       st.write(df)
-      mensaje_estado = "Se obtuvieron con éxito :) ✅"
+      mensaje_estado = "Se obtuvieron con éxito ✅"
    except Exception as e:
       st.write(e)
-      mensaje_estado = "Hubo un error, verifique sus datos :( ❌"
+      mensaje_estado = "Hubo un error, verifique sus datos ❌"
    st.write(mensaje_estado)
    
    st.subheader("Visualización", divider="green")
@@ -474,7 +516,7 @@ if uploaded_file is not None:
    
    ruta_completa_variable: str = rutas_variables_usuario[rutas_variables_usuario["NombreVariable"] == selected_variable]["RutaCompleta"].iloc[0]
    
-   tmp:list = ruta_completa_variable.split(">")[-3:-1] if len(ruta_completa_variable.split(">")[:-1]) > 3 else ruta_completa_variable.split(">")[:-1]
+   tmp:list = ruta_completa_variable.split(">")[-4:-1] if len(ruta_completa_variable.split(">")[:-1]) > 3 else ruta_completa_variable.split(">")[:-1]
 
    ruta_completa_variable = ">".join(tmp)
    
@@ -484,31 +526,33 @@ if uploaded_file is not None:
    #st.line_chart(data=df_sin_nans, y=selected_variable, height=450)
    fig = px.line(df_sin_nans, y=selected_variable) #title=" ".join(selected_variable.split(" ")[1:]))
    # Configurar el diseño (layout)
-   fig.update_layout(
-    title=ruta_completa_variable,  # Título principal
-    xaxis_title='Eje X',  # Título del eje X
-    yaxis_title='Eje Y',  # Título del eje Y
-    title_font=dict(size=14),  # Tamaño de fuente del título principal
-    title_x=0.06,  # Posición del título principal en el eje X (0.5 = centrado)
-    title_y=0.95,  # Posición del título principal en el eje Y
-    #title_text=ruta_completa_variable,  # Texto del subtítulo   
-)
+   nombres_rutas = ruta_completa_variable.split(">")
    
-
+#    fig.update_layout(
+#     title="hola\n memo",  # Título principal
+#     xaxis_title='Eje X',  # Título del eje X
+#     yaxis_title='Eje Y',  # Título del eje Y
+#     title_font=dict(size=14),  # Tamaño de fuente del título principal
+#     title_x=0.06,  # Posición del título principal en el eje X (0.5 = centrado)
+#     title_y=0.95,  # Posición del título principal en el eje Y  
+# )
+   
    # Agregar el subtítulo mediante annotations
    fig.update_layout(
-    annotations=[
-        dict(
+      annotations = [
+         dict(
             x=0.0,  # Posición en el eje X (0.5 = centrado)
-            y=1.2,  # Posición en el eje Y (negativo para colocarlo debajo del título principal)
+            y=1.21 - (0.05*(i+1)),  # Posición en el eje Y (negativo para colocarlo debajo del título principal)
             xref="paper",
             yref="paper",
-            text="Últimos dos framentos de su ruta:",
+            text= nombre + ">",
             showarrow=False,
             font=dict(size=14)  # Tamaño de fuente del subtítulo
         )
-    ]
-)
+        for i, nombre in enumerate(nombres_rutas)
+      ]
+    )
+
    st.plotly_chart(fig)
 
    # Dash

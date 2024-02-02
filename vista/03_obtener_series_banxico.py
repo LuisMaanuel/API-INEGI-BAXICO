@@ -54,8 +54,32 @@ def obtener_serie(ruta_archivo: str, formato:str, token:str = ""):
   # Se instancia la interfaz que se counicara con INEGI
   #inegi = Indicadores(token)  
   #api = SIEBanxico(token = token, id_series = claves.tolist(), language = 'en')
+  # st.write(variables_usuario)
+  # st.write(catalogo_se)
 
   variables_df = pd.DataFrame({"Mensaje": ["No entro en ninguno de los condicionales programadas (if) reportar"]})
+
+  variables_usuario_ = variables_usuario[variables_usuario.isin(catalogo_se.index)]
+  
+  if len(variables_usuario_) != len(variables_usuario):
+       col1, col2 = st.columns(2)
+       with col1:
+          st.write(f"Claves que no se puedieron encontrar: {len(variables_usuario)-len(variables_usuario_)}")
+       with col2:          
+          excel_file = BytesIO()
+          no_encontradas = variables_usuario[-variables_usuario.isin(catalogo_se.index)]
+          no_encontradas.to_excel(excel_file, index=False, engine='xlsxwriter')
+          excel_file.seek(0)
+          # Descargar el archivo Excel
+          st.download_button(
+              label="Variables no encontradas 📥",
+              data=excel_file,
+              file_name='variables_no_encontradas.xlsx',
+              key='download_button_nofind'
+          )
+  
+  variables_usuario = variables_usuario_  
+  # Filtramos 
   if formato == "Rutas":
     #Para cada variable tendremos que sacar su clave y nombre de la variable    
     # En el caso que haya más de dos claves se seleciona la longitud maxima (SOLUCION PROVISIONAL)
@@ -201,10 +225,10 @@ if uploaded_file is not None:
 
       st.write(f"Resumen de los datos")
       st.write(df)
-      mensaje_estado = "Se obtuvieron con éxito :) ✅"
+      mensaje_estado = "Se obtuvieron con éxito ✅"
    except Exception as e:
       st.write(e)
-      mensaje_estado = "Hubo un error, verifique sus datos :( ❌"
+      mensaje_estado = "Hubo un error, verifique sus datos ❌"
    st.write(mensaje_estado)
    
    st.subheader("Visualización", divider="blue")
@@ -218,28 +242,32 @@ if uploaded_file is not None:
    df_sin_nans = df[selected_variable].dropna()
    #st.line_chart(data=df_sin_nans, y=selected_variable, height=450)
    fig = px.line(df_sin_nans, y=selected_variable)#, title=" ".join(selected_variable.split(" ")[1:]))
-   fig.update_layout(
-    title=ruta_completa_variable,  # Título principal
-    xaxis_title='Eje X',  # Título del eje X
-    yaxis_title='Eje Y',  # Título del eje Y
-    title_font=dict(size=14),  # Tamaño de fuente del título principal
-    title_x=0.06,  # Posición del título principal en el eje X (0.5 = centrado)
-    title_y=0.95,  # Posición del título principal en el eje Y
-    #title_text=ruta_completa_variable,  # Texto del subtítulo   
-)
+#    fig.update_layout(
+#     title=ruta_completa_variable,  # Título principal
+#     xaxis_title='Eje X',  # Título del eje X
+#     yaxis_title='Eje Y',  # Título del eje Y
+#     title_font=dict(size=14),  # Tamaño de fuente del título principal
+#     title_x=0.06,  # Posición del título principal en el eje X (0.5 = centrado)
+#     title_y=0.95,  # Posición del título principal en el eje Y
+#     #title_text=ruta_completa_variable,  # Texto del subtítulo   
+# )
+   # Configurar el diseño (layout)}
+   nombres_rutas = ruta_completa_variable.split(">")[-4:-1] if len(ruta_completa_variable.split(">")[:-1]) > 3 else ruta_completa_variable.split(">")[:-1]
+
    # Agregar el subtítulo mediante annotations
    if formato_excel=="Rutas":
       fig.update_layout(
-      annotations=[
-          dict(
-              x=0.0,  # Posición en el eje X (0.5 = centrado)
-              y=1.2,  # Posición en el eje Y (negativo para colocarlo debajo del título principal)
-              xref="paper",
-              yref="paper",
-              text="Últimos dos framentos de su ruta:",
-              showarrow=False,
-              font=dict(size=14)  # Tamaño de fuente del subtítulo
-          )
+      annotations = [
+         dict(
+            x=0.0,  # Posición en el eje X (0.5 = centrado)
+            y=1.21 - (0.05*(i+1)),  # Posición en el eje Y (negativo para colocarlo debajo del título principal)
+            xref="paper",
+            yref="paper",
+            text= nombre + ">",
+            showarrow=False,
+            font=dict(size=14)  # Tamaño de fuente del subtítulo
+        )
+        for i, nombre in enumerate(nombres_rutas)
       ]
   )
    st.plotly_chart(fig)
