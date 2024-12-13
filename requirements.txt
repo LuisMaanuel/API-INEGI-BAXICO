@@ -1,0 +1,9 @@
+openpyxl
+INEGIpy
+pyxlsb
+xlsxwriter
+streamlit
+st-pages
+sie-banxico
+plotly
+kaleido

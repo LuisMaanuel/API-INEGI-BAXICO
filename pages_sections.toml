@@ -1,0 +1,15 @@
+[[pages]]
+path = "vista/02_obtener_series_inegi.py"
+name = "INEGI"
+icon = "📄"
+
+[[pages]]
+path = "vista/03_obtener_series_banxico.py"
+name = "BANXICO"
+icon = "📄"
+
+[[pages]]
+path = "vista/04_buscar.py"
+name = "BUSCAR"
+icon = "📄"
+
