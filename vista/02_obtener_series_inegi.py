@@ -37,11 +37,8 @@ def load_data_objeto(url):
     return catalogo_inegi
 
 
-import pandas as pd
-import requests
-import json
-import warnings
-from numpy import nan
+
+
 
 class Indicadores:
     
@@ -477,6 +474,22 @@ with st.sidebar:
 # Titulo principal y pequeña explicación
 st.title("Obtener datos :green[INEGI] 📊")
 st.write("Aqui se obtendra las series de Inegi")
+
+
+# Estructura de los datos a subir
+st.subheader("Estructura de los datos a subir", divider="green")
+st.write('''Para un correcto funcionamiento, es importante que el archivo excel (.xlsx) tenga la siguiente estructura.
+         Donde la primer columa corresponde a la clave o ruta de la serie a descargar y la segunda columna (opcional) es el nombre deseado para dicha serie.
+         En caso de tener una tercer columna es importante que la segunda corresponda a los nombres deseados.''')
+
+st.write('''En caso de no proporcionar la columna opcional del nombre, se le asignara la clave de la serie seguido del nombre que tiene dicha serie en la plataforma.''')
+
+st.write('Ejemplo de la estructura con claves')
+st.write(pd.read_excel('./catalogo/INEGI/estructura_claves.xlsx'))
+
+st.write('Ejemplo de la estructura con rutas')
+st.write(pd.read_excel('./catalogo/INEGI/estructura_rutas.xlsx'))
+
 
 # Configuración inicial
 st.subheader("Configuración inicial", divider="green")

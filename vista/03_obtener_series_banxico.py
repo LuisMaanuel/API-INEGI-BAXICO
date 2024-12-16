@@ -31,6 +31,8 @@ def load_data_objeto(url):
 catalogo: pd.DataFrame = load_data_objeto('./catalogo/catalogoBANXICO.pkl')
 rutas_variables_usuario = None
 
+
+
 def construir_catalogo(formato: str):
   if formato.strip() == "Rutas":
     columna_formato = "Ruta"
@@ -38,6 +40,7 @@ def construir_catalogo(formato: str):
     columna_formato = "Clave"
   tmp = catalogo[["Ruta", "Clave"]].set_index(columna_formato).squeeze()
   return tmp 
+
 
 def obtener_serie(ruta_archivo: str, formato:str, token:str = ""):
   global rutas_variables_usuario
@@ -86,15 +89,16 @@ def obtener_serie(ruta_archivo: str, formato:str, token:str = ""):
     # Cada ruta debe debe tener una clave unica
     # Como solucion provisional en el caso tengas más de una clave se toma la primero(ESTO SE DEBE REVISAR PORQUE SE TIENE MÁS DE UNA CLAVE)
     claves_variables =  variables_usuario.apply(lambda x: catalogo_se[x] if  type(catalogo_se[x]) is str else catalogo_se[x].iloc[0])
-    #nombres_variables = variables_usuario.apply(lambda x: x.split(">")[-1])
+    nombres_variables = variables_usuario.apply(lambda x: x.split(">")[-1])
 
   elif formato == "Claves":
     # En esta parte se trata cuando se tiene la misma clave con diferentes rutas
     claves_variables =  variables_usuario
+    nombres_variables = variables_usuario.apply(lambda x: catalogo_se[x] if  type(catalogo_se[x]) is str else catalogo_se[x].iloc[0])
     #nombres_variables = variables_usuario.apply(lambda x: catalogo_se[x].split(">")[-1])
     
     # Conservaremos el mismo nombre de la variable
-    nombres_variables = claves_variables
+    #nombres_variables = claves_variables
   
   if len(archivo.columns) > 1:
       ## obtenemos los nombres de las columnas en caso de que existan,
@@ -104,10 +108,10 @@ def obtener_serie(ruta_archivo: str, formato:str, token:str = ""):
 
       
   else:
-      nombres_variables = variables_usuario_.apply(lambda x: x.split(">")[-1])
+      nombres_variables_ = nombres_variables.apply(lambda x: x.split(">")[-1])
       #st.write(nombres_variables)
       # Hace unico los nombres, pero no esta excento que la ruta la pongan dos veces
-      nombres_variables = [str(clave) + nombre for clave, nombre in zip(claves_variables, nombres_variables)]
+      nombres_variables = [str(clave) + ' '+ nombre for clave, nombre in zip(claves_variables, nombres_variables_)]
   # Convertir todo cadena
   claves_variables = claves_variables.astype(str)
 
@@ -175,6 +179,24 @@ with st.sidebar:
 
 # Titulo principal y pequeña explicación
 st.title("Obtener datos :blue[BANXICO] :chart_with_downwards_trend:")
+
+
+# Estructura de los datos a subir
+st.subheader("Estructura de los datos a subir", divider="blue")
+st.write('''Para un correcto funcionamiento, es importante que el archivo excel (.xlsx) tenga la siguiente estructura.
+         Donde la primer columa corresponde a la clave o ruta de la serie a descargar y la segunda columna (opcional) es el nombre deseado para dicha serie.
+         En caso de tener una tercer columna es importante que la segunda corresponda a los nombres deseados.''')
+
+st.write('''En caso de no proporcionar la columna opcional del nombre, se le asignara la clave de la serie seguido del nombre que tiene dicha serie en la plataforma.''')
+
+st.write('Ejemplo de la estructura con claves')
+st.write(pd.read_excel('./catalogo/BANXICO/estructura_claves.xlsx'))
+
+st.write('Ejemplo de la estructura con rutas')
+st.write(pd.read_excel('./catalogo/BANXICO/estructura_rutas.xlsx'))
+
+
+
 
 # Configuración inicial
 st.subheader("Configuración inicial", divider="blue")

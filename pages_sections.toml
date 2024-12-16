@@ -14,6 +14,11 @@ name = "BANXICO"
 icon = "📘"
 
 [[pages]]
+path = "vista/04_obtener_series_inegi_y_banxico.py"
+name = "INEGI Y BANXICO"
+icon = "📙"
+
+[[pages]]
 path = "vista/04_buscar.py"
 name = "BUSCAR RUTAS"
 icon = "🔎"
