@@ -1,15 +1,20 @@
 [[pages]]
+path = "vista/01_introduccion.py"
+name = "INTRODUCCION"
+icon = "🏠"
+
+[[pages]]
 path = "vista/02_obtener_series_inegi.py"
 name = "INEGI"
-icon = "📄"
+icon = "📗"
 
 [[pages]]
 path = "vista/03_obtener_series_banxico.py"
 name = "BANXICO"
-icon = "📄"
+icon = "📘"
 
 [[pages]]
 path = "vista/04_buscar.py"
-name = "BUSCAR"
-icon = "📄"
+name = "BUSCAR RUTAS"
+icon = "🔎"
 
