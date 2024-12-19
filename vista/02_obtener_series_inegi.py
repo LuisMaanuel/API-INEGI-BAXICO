@@ -478,11 +478,15 @@ st.write("Aqui se obtendra las series de Inegi")
 
 # Estructura de los datos a subir
 st.subheader("Estructura de los datos a subir", divider="green")
-st.write('''Para un correcto funcionamiento, es importante que el archivo excel (.xlsx) tenga la siguiente estructura.
-         Donde la primer columa corresponde a la clave o ruta de la serie a descargar y la segunda columna (opcional) es el nombre deseado para dicha serie.
-         En caso de tener una tercer columna es importante que la segunda corresponda a los nombres deseados.''')
 
-st.write('''En caso de no proporcionar la columna opcional del nombre, se le asignara la clave de la serie seguido del nombre que tiene dicha serie en la plataforma.''')
+st.write('Para un correcto funcionamiento, es importante que el archivo excel (.xlsx) tenga la siguiente estructura.')
+
+st.markdown('- Primer columa: corresponde a la clave o ruta de la serie a descargar.') 
+st.markdown('- Segunda columna (opcional): es el nombre deseado para dicha serie.')
+
+st.write('''En caso de no proporcionar la columna opcional del nombre, se le asignara la clave de la serie seguido del nombre que tiene dicha serie en la plataforma.
+         Si se tiene una tercer columna es importante que la segunda corresponda a los nombres deseados.''')
+
 
 st.write('Ejemplo de la estructura con claves')
 st.write(pd.read_excel('./catalogo/INEGI/estructura_claves.xlsx'))
@@ -493,7 +497,7 @@ st.write(pd.read_excel('./catalogo/INEGI/estructura_rutas.xlsx'))
 
 # Configuración inicial
 st.subheader("Configuración inicial", divider="green")
-token = st.text_input('Escribir token', placeholder='Ej. f6a7b69c-5c48-bf0c-b191-5ca98c6a6cc0')
+token = st.text_input('Escribir token', placeholder='Ej. c64be54e-1842-acb9-0843-baad4ab4aa56')
 token = 'c64be54e-1842-acb9-0843-baad4ab4aa56' if not token else token
 st.write("Token escrito: ", token)
 

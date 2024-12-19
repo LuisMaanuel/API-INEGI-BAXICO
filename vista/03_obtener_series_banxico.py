@@ -85,7 +85,6 @@ def obtener_serie(ruta_archivo: str, formato:str, token:str = ""):
   if formato == "Rutas":
     #Para cada variable tendremos que sacar su clave y nombre de la variable    
     # En el caso que haya más de dos claves se seleciona la longitud maxima (SOLUCION PROVISIONAL)
-    #st.write(catalogo_se[variables_usuario.iloc[3]])
     # Cada ruta debe debe tener una clave unica
     # Como solucion provisional en el caso tengas más de una clave se toma la primero(ESTO SE DEBE REVISAR PORQUE SE TIENE MÁS DE UNA CLAVE)
     claves_variables =  variables_usuario.apply(lambda x: catalogo_se[x] if  type(catalogo_se[x]) is str else catalogo_se[x].iloc[0])
@@ -183,11 +182,13 @@ st.title("Obtener datos :blue[BANXICO] :chart_with_downwards_trend:")
 
 # Estructura de los datos a subir
 st.subheader("Estructura de los datos a subir", divider="blue")
-st.write('''Para un correcto funcionamiento, es importante que el archivo excel (.xlsx) tenga la siguiente estructura.
-         Donde la primer columa corresponde a la clave o ruta de la serie a descargar y la segunda columna (opcional) es el nombre deseado para dicha serie.
-         En caso de tener una tercer columna es importante que la segunda corresponda a los nombres deseados.''')
+st.write('Para un correcto funcionamiento, es importante que el archivo excel (.xlsx) tenga la siguiente estructura.')
 
-st.write('''En caso de no proporcionar la columna opcional del nombre, se le asignara la clave de la serie seguido del nombre que tiene dicha serie en la plataforma.''')
+st.markdown('- Primer columa: corresponde a la clave o ruta de la serie a descargar.') 
+st.markdown('- Segunda columna (opcional): es el nombre deseado para dicha serie.')
+
+st.write('''En caso de no proporcionar la columna opcional del nombre, se le asignara la clave de la serie seguido del nombre que tiene dicha serie en la plataforma.
+         Si se tiene una tercer columna es importante que la segunda corresponda a los nombres deseados.''')
 
 st.write('Ejemplo de la estructura con claves')
 st.write(pd.read_excel('./catalogo/BANXICO/estructura_claves.xlsx'))
