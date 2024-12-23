@@ -339,17 +339,16 @@ st.subheader("Estructura de los datos a subir", divider="orange")
 st.write('Para un correcto funcionamiento, es importante que el archivo excel (.xlsx) tenga la siguiente estructura.')
 
 
-st.markdown('- Primer columa corresponde a la clave o ruta (todas deben de ser claves o rutas) de la serie a descargar')
-st.markdown('- Segunda columna: indica si la serie es de BANXICO o INEGI. Es importante especificar de que fuente se debe extraer la serie.')
-st.markdown('''- Tercer columna: es el nombre deseado para dicha serie, la cual opcional. Si se estan subiendo datos sin esta columna se 
+st.markdown('- **Primer columa**: corresponde a la clave o ruta (todas deben de ser claves o rutas) de la serie a descargar')
+st.markdown('- **Segunda columna**: indica si la serie es de BANXICO o INEGI. Es importante especificar de que fuente se debe extraer la serie.')
+st.markdown('''- **Tercer columna**: es el nombre deseado para dicha serie, **la cual opcional pero recomendable**. Si se estan subiendo datos sin esta columna se 
                 asignara por defecto la clave y nombre de la serie, lo cual por la clave se asegura que aunque dos series se llamen igual (indice general) 
-                la clave hace que el nombre asignado sea unico.
-                
-                En el caso de realizar una busqueda por rutas y no proporcionar los nombres deseados no se asegura que el orden en que se regresan las variables 
-                sea el mismo que cuando se subieron.''')
+                la clave hace que el nombre asignado sea unico.''')
 
-st.write('''En caso de no proporcionar la columna opcional del nombre, se le asignara la clave de la serie 
-         seguido del nombre que tiene dicha serie en la plataforma.''')
+st.markdown('''**_En el caso de realizar una busqueda por rutas y no proporcionar los nombres deseados no se asegura que el orden en el que se regresan las variables 
+                sea el mismo que cuando se subieron. Esto puede afectar en la seccion de comparación, ya que al tener distintos ordenes, 
+                cuando se comparen los dos archivos puede que se esten comparando dos columnas (series económicas) que no son iguales._**''')
+
 
 
 st.write('Ejemplo de la estructura con claves')
