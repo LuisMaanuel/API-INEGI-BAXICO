@@ -88,12 +88,14 @@ def obtener_serie(ruta_archivo: str, formato:str, token:str = ""):
     # Cada ruta debe debe tener una clave unica
     # Como solucion provisional en el caso tengas más de una clave se toma la primero(ESTO SE DEBE REVISAR PORQUE SE TIENE MÁS DE UNA CLAVE)
     claves_variables =  variables_usuario.apply(lambda x: catalogo_se[x] if  type(catalogo_se[x]) is str else catalogo_se[x].iloc[0])
-    nombres_variables = variables_usuario.apply(lambda x: x.split(">")[-1])
+    nombres_variables = variables_usuario.apply(lambda x: x.split(">")[-1] if x.split(">")[-1] else x.split(">")[-2])
+    rutas = variables_usuario#.copy()
 
   elif formato == "Claves":
     # En esta parte se trata cuando se tiene la misma clave con diferentes rutas
     claves_variables =  variables_usuario
     nombres_variables = variables_usuario.apply(lambda x: catalogo_se[x] if  type(catalogo_se[x]) is str else catalogo_se[x].iloc[0])
+    rutas = nombres_variables.copy()
     #nombres_variables = variables_usuario.apply(lambda x: catalogo_se[x].split(">")[-1])
     
     # Conservaremos el mismo nombre de la variable
@@ -107,6 +109,7 @@ def obtener_serie(ruta_archivo: str, formato:str, token:str = ""):
 
       
   else:
+      #st.write('nombres_variables',nombres_variables)
       nombres_variables_ = nombres_variables.apply(lambda x: x.split(">")[-1])
       #st.write(nombres_variables)
       # Hace unico los nombres, pero no esta excento que la ruta la pongan dos veces
@@ -120,7 +123,7 @@ def obtener_serie(ruta_archivo: str, formato:str, token:str = ""):
   # Mayor verificacion, quitar los duplicados de la lista si es que existen
   #claves_variables = list(set(claves_variables))
   #nombres_variables = list(set(nombres_variables))
-  rutas_variables_usuario = pd.DataFrame({"RutaCompleta": variables_usuario, "NombreVariable": nombres_variables})
+  rutas_variables_usuario = pd.DataFrame({"RutaCompleta": rutas, "NombreVariable": nombres_variables})
   
   # Uso de la API de BANXICO
   api = SIEBanxico(token = token, id_series = claves_variables.tolist(), language = 'en')
@@ -143,6 +146,10 @@ def obtener_serie(ruta_archivo: str, formato:str, token:str = ""):
   for columna in df.columns:
     df[columna] = df[columna].replace("N/E", np.nan)
   return df
+
+
+
+
 
 
 # -------------------------- Interfaz ---------------------------

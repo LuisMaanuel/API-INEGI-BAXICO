@@ -235,21 +235,25 @@ def obtener_serie_BANXICO(ruta_archivo: pd.DataFrame, formato:str, token:str = "
     # Cada ruta debe debe tener una clave unica
     # Como solucion provisional en el caso tengas más de una clave se toma la primero(ESTO SE DEBE REVISAR PORQUE SE TIENE MÁS DE UNA CLAVE)
     claves_variables =  variables_usuario.apply(lambda x: catalogo_se[x] if  type(catalogo_se[x]) is str else catalogo_se[x].iloc[0])
-    nombres_variables = variables_usuario.apply(lambda x: x.split(">")[-1])
+    nombres_variables = variables_usuario.apply(lambda x: x.split(">")[-1] if x.split(">")[-1] else x.split(">")[-2])
+    #st.write('asefasdfdsf')
+    #st.write(variables_usuario)
+    rutas = variables_usuario.copy()
 
   elif formato == "Claves":
     # En esta parte se trata cuando se tiene la misma clave con diferentes rutas
     claves_variables =  variables_usuario
     nombres_variables = variables_usuario.apply(lambda x: catalogo_se[x] if  type(catalogo_se[x]) is str else catalogo_se[x].iloc[0])
-  
+    rutas = nombres_variables.copy()
+
   if len(archivo.columns) > 2:
       ## obtenemos los nombres de las columnas en caso de que existan,
       ## por defecto se estan considerando que los nombres estan en la segunda columna
       nombres_variables = archivo.iloc[:,-1].values
       nombres_variables = nombres_variables[variables_filtro]
-
       
   else:
+      rutas = nombres_variables
       nombres_variables_ = nombres_variables.apply(lambda x: x.split(">")[-1])
       #st.write(nombres_variables)
       # Hace unico los nombres, pero no esta excento que la ruta la pongan dos veces
@@ -263,7 +267,7 @@ def obtener_serie_BANXICO(ruta_archivo: pd.DataFrame, formato:str, token:str = "
   # Mayor verificacion, quitar los duplicados de la lista si es que existen
   #claves_variables = list(set(claves_variables))
   #nombres_variables = list(set(nombres_variables))
-  rutas_variables_usuario_2 = pd.DataFrame({"RutaCompleta": variables_usuario, "NombreVariable": nombres_variables})
+  rutas_variables_usuario_2 = pd.DataFrame({"RutaCompleta": rutas, "NombreVariable": nombres_variables})
   
   # Uso de la API de BANXICO
   api = SIEBanxico(token = token, id_series = claves_variables.tolist(), language = 'en')
@@ -337,7 +341,12 @@ st.write('Para un correcto funcionamiento, es importante que el archivo excel (.
 
 st.markdown('- Primer columa corresponde a la clave o ruta (todas deben de ser claves o rutas) de la serie a descargar')
 st.markdown('- Segunda columna: indica si la serie es de BANXICO o INEGI. Es importante especificar de que fuente se debe extraer la serie.')
-st.markdown('- Tercer columna: es el nombre deseado para dicha serie (opcional)')
+st.markdown('''- Tercer columna: es el nombre deseado para dicha serie, la cual opcional. Si se estan subiendo datos sin esta columna se 
+                asignara por defecto la clave y nombre de la serie, lo cual por la clave se asegura que aunque dos series se llamen igual (indice general) 
+                la clave hace que el nombre asignado sea unico.
+                
+                En el caso de realizar una busqueda por rutas y no proporcionar los nombres deseados no se asegura que el orden en que se regresan las variables 
+                sea el mismo que cuando se subieron.''')
 
 st.write('''En caso de no proporcionar la columna opcional del nombre, se le asignara la clave de la serie 
          seguido del nombre que tiene dicha serie en la plataforma.''')
@@ -464,6 +473,18 @@ if uploaded_file:
       df = pd.concat([df_inegi, df_banxico]).groupby('fecha', as_index=False).agg('first')\
           .sort_values(by='fecha',ascending=True).set_index('fecha')
       
+      df.columns = [' '.join(col.strip().split()) for col in df.columns]
+      #st.write('new cols')
+      #st.write(df.columns)
+
+      rutas_variables_usuario = pd.concat([rutas_variables_usuario_1,rutas_variables_usuario_2])
+      #st.write('rutas_variables')
+      #st.write(rutas_variables_usuario)
+      rutas_variables_usuario["NombreVariable"] = [' '.join(col.strip().split()) for col in rutas_variables_usuario["NombreVariable"] ]
+      #rutas_variables_usuario = rutas_variables_usuario.set_index('NombreVariable').T[df.columns].T.reset_index()
+      #st.write('rutas_variables 2')
+      #st.write(rutas_variables_usuario)
+
       ## selecionamos las variables en el orden que fueron proporcionadas
       if len(data.columns) > 2: # caso en el que los nombres de las variables fueron proporcionadas
          df = df[data[data.columns[-1]].values]
@@ -480,16 +501,21 @@ if uploaded_file:
         ## ya sea nombre de serie o clave
 
         # si coincide con la clave
-        if nombre == data_inegi.columns[0].split(' ')[0] or nombre == data_banxico.columns[0].split(' ')[0]:
-           df.columns = [ col.split(' ')[0] for col in df.columns]
-           df = df[data[data.columns[0]].values ]
+        if str(nombre) == str(data_inegi.iloc[0,0]) or str(nombre) == data_banxico.columns[0].split(' ')[0]:
+           df.columns = [ col.split(' ')[0].strip() for col in df.columns]
+           df = df[[ str(val).strip() for val in data[data.columns[0]]] ]
+
+           rutas_variables_usuario["NombreVariable"] = rutas_variables_usuario["NombreVariable"].apply(lambda x: x.split(' ',1)[0] )
 
         
         # coincide con nombre de ruta
         else:
-           print('df.columns',df.columns)
-           df.columns = [col.split(' ',1)[1] for col in df.columns]
-           df = df[ [col.split('>')[-1] for col in data[data.columns[0]]] ]
+           #print('df.columns',df.columns)
+           df.columns = [ ' '.join(col.split('>')[-2:]) for col in rutas_variables_usuario['NombreVariable'].values ]
+           #df.columns = [(col.split(' ',1)[1].split()) for col in df.columns]
+           #print('cols 1\n', df.columns)
+           #print('\n\nCols 2', [col.split('>')[-1].strip() for col in data[data.columns[0]]])
+           #df = df[ [col.split('>')[-1].strip() for col in data[data.columns[0]]] ]
                    
         
          
@@ -504,20 +530,38 @@ if uploaded_file:
 
 
 
-    ####
-    ####    Visualizacion de las graficas
-    ####
+
+
+
+
+
+# -----------------------------
+# -----------------------------                 Visualizacion de las graficas
+# -----------------------------
+
+
+
+
+
+
+
     st.subheader("Visualización", divider="orange")
     selected_variable = st.selectbox('Selecciona la variable a graficar:', df.columns)
 
-    rutas_variables_usuario = pd.concat([rutas_variables_usuario_1,rutas_variables_usuario_2])
+    
+    #st.write(selected_variable)
+    rutas_variables_usuario = rutas_variables_usuario.set_index('NombreVariable').T[df.columns].T.reset_index()
+    #st.write(rutas_variables_usuario)
+
+
+
     ruta_completa_variable: str = rutas_variables_usuario[rutas_variables_usuario["NombreVariable"] == selected_variable]["RutaCompleta"].iloc[0]
     tmp:list = ruta_completa_variable.split(">")[-4:-1] if len(ruta_completa_variable.split(">")[:-1]) > 3 else ruta_completa_variable.split(">")[:-1]
     ruta_completa_variable = ">".join(tmp)
+    nombres_rutas = ruta_completa_variable.split(">")
 
     df_sin_nans = df[selected_variable].dropna()
     fig = px.line(df_sin_nans, y=selected_variable)
-    nombres_rutas = ruta_completa_variable.split(">")
 
     fig.update_layout(
       annotations = [
@@ -540,8 +584,8 @@ if uploaded_file:
     df_dash = pd.DataFrame(
        {
               
-              "Variable": df.columns,                            
-              "Historia": [(df[col].dropna()).tolist() for col in df.columns],
+              "Variable": rutas_variables_usuario['NombreVariable'],                            
+              "Historia": [(df[col].dropna()).tolist() for col in rutas_variables_usuario['NombreVariable']],
               "Ruta": rutas_variables_usuario["RutaCompleta"],
           }
       )
