@@ -19,7 +19,11 @@ name = "INEGI Y BANXICO"
 icon = "📙"
 
 [[pages]]
+path = "vista/05_comparacion.py"
+name = "Comparacion de datos"
+icon = "🆚"
+
+[[pages]]
 path = "vista/04_buscar.py"
 name = "BUSCAR RUTAS"
 icon = "🔎"
-
