@@ -54,16 +54,23 @@ def get_trimestrales(df):
    (2020/01, 2020/02, 2020/03, 2020/04) y quitamos el año.
    '''
    trimestrales = []
+
    
    for col in df.columns:
        cjt = set()
+       count = 0
        filter = df[col].dropna()
        filter= filter.to_frame().reset_index()
        for fecha in filter['fechas']:
           cjt.add(str(fecha)[-2:])
+          count += 1
+          
+          if count >6:
+            if cjt == {'01','02','03','04'}:
+                trimestrales.append(col)
+            break
+                
 
-       if cjt == {'01','02','03','04'}:
-          trimestrales.append(col)        
    return trimestrales
 
 mapper = {

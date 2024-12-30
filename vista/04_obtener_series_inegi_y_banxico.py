@@ -305,7 +305,48 @@ def obtener_serie_BANXICO(ruta_archivo: pd.DataFrame, formato:str, token:str = "
 
 
 
+def get_trimestrales(df):
+   '''
+   Parameters: df, pandas dataframe donde el index es la fecha
+   Return: Lista con los nombres de las series trimestrales
 
+   Una serie trimestral tiene a lo mas 4 registros por año, por lo que si nosotros tenemos una serie que va desde el
+   2010 hasta el 2020 entonces tenemos 10 años, por  lo que la serie trimestral debe tener mas de 3 registros al año y a lo mas 4
+   lo cual nos da una cota en el ejemplo de mas 30 registros y a lo mas 40.
+   
+   CReamos un conjunto {01, 02, 03, 04} e iteramos sobre las fechas de cada serie donde si tenemos registros validos
+   (2020/01, 2020/02, 2020/03, 2020/04) y quitamos el año.
+   '''
+   trimestrales = []
+
+   
+   for col in df.columns:
+       cjt = set()
+       count = 0
+       filter = df[col].dropna()
+       filter= filter.to_frame().reset_index()
+       for fecha in filter['fecha']:
+          cjt.add(str(fecha)[5:7])
+          count += 1
+          
+          if count >6:
+            if cjt == {'01','02','03','04'}:
+                trimestrales.append(col)
+            break                
+
+   return trimestrales
+
+mapper = {
+    '01':'03',
+    '02':'06',
+    '03':'09',
+    '04':'12',
+}
+def trimestres_a_anual(df,columns):
+    trimes = df[columns].reset_index().dropna()
+    trimes['fecha'] = trimes['fecha'].apply(lambda x: str(x)[:5] + mapper[ str(x)[5:7]] + str(x)[7:]  ) 
+    trimes.fecha = pd.to_datetime(trimes.fecha, format='%Y-%m-%d').dt.date
+    return trimes
 
 
 
@@ -453,24 +494,52 @@ if uploaded_file:
       ##############
       ############## obtencion de series de INEGI
       ##############
-      df_inegi = obtener_serie_INEGI(data_inegi, formato_excel, token_INEGI)
+      df_inegi = obtener_serie_INEGI(data_inegi, formato_excel, token_INEGI) #if not data_inegi.empty() else None
 
       ##############
       ############## obtencion de series de BANXICO
       ##############
 
-      df_banxico = obtener_serie_BANXICO(data_banxico, formato_excel, token_BANXICO)
+      df_banxico = obtener_serie_BANXICO(data_banxico, formato_excel, token_BANXICO) #if not data_banxico.empty() else None
+
+
+      ## se juntan los datos de inegi y banxico
+      df = pd.concat([df_inegi, df_banxico]).groupby('fecha', as_index=False).agg('first')\
+          .sort_values(by='fecha',ascending=True).set_index('fecha')
+      #st.write('df')
+      #st.write(df)
+      
+      ## encontramos las series trimestrales y las ponemos en el formato adecuado
+      trimestrales = get_trimestrales(df)
+      trimestrales_df = trimestres_a_anual(df, trimestrales)
+      #st.write('trimestrales df')
+      #st.write(trimestrales_df)
+      #st.write(trimestrales_df.dtypes)
+
+      no_trimestrales = df[[col for col in df.columns if col not in trimestrales] ]
+      no_trimestrales.reset_index(inplace=True)
+      #st.write('no trimestrales')
+      #st.write(no_trimestrales)
+      #st.write(no_trimestrales.dtypes)
+      
+      
+      df = no_trimestrales.merge(trimestrales_df, how='left',on='fecha')
+      #st.write('df 2')
+      #st.write(df)
+
+      df.fecha = pd.to_datetime(df.fecha, format='%Y/%m/%d').dt.date
+      #df.set_index('fecha', inplace=True)
+
+
 
 
       ## filtramos los datos por fecha de inicio y de fin
       if fecha_inicio:
 
-        df_banxico = df_banxico[(df_banxico.fecha >= fecha_inicio) & (df_banxico.fecha <= fecha_fin)]
-        df_inegi = df_inegi[(df_inegi.fecha >= fecha_inicio) & (df_inegi.fecha <= fecha_fin)]
+        df = df[(df.fecha >= fecha_inicio) & (df.fecha <= fecha_fin)]
+      df.set_index('fecha', inplace=True)
+        
 
-      ## se juntan los datos de inegi y banxico
-      df = pd.concat([df_inegi, df_banxico]).groupby('fecha', as_index=False).agg('first')\
-          .sort_values(by='fecha',ascending=True).set_index('fecha')
       
       df.columns = [' '.join(col.strip().split()) for col in df.columns]
       #st.write('new cols')

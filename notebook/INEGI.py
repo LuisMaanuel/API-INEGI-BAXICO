@@ -36,7 +36,7 @@ class Indicadores:
     # aquí falta un control de errores cuando no se pudo obtener la info y advirtiendo que se cheque bien el token
     def __request(self, liga_api):
         print(liga_api)
-        req = requests.get(liga_api)
+        req = requests.get(liga_api, verify=False)
         assert req.status_code == 200, 'No se encontró información con las parámetros especificados.'
         data = json.loads(req.text)
         return data
