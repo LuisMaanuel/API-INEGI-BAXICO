@@ -11,6 +11,9 @@ import warnings
 import requests
 import json
 from datetime import datetime
+from dateutil import relativedelta
+
+
 import plotly.express as px
 import plotly.io as pio
 
@@ -36,6 +39,43 @@ def load_data_objeto(url):
         catalogo_inegi = pickle.load(f)
     return catalogo_inegi
 
+
+
+def get_trimestrales(df):
+   '''
+   Parameters: df, pandas dataframe donde el index es la fecha
+   Return: Lista con los nombres de las series trimestrales
+
+   Una serie trimestral tiene a lo mas 4 registros por año, por lo que si nosotros tenemos una serie que va desde el
+   2010 hasta el 2020 entonces tenemos 10 años, por  lo que la serie trimestral debe tener mas de 3 registros al año y a lo mas 4
+   lo cual nos da una cota en el ejemplo de mas 30 registros y a lo mas 40.
+   
+   CReamos un conjunto {01, 02, 03, 04} e iteramos sobre las fechas de cada serie donde si tenemos registros validos
+   (2020/01, 2020/02, 2020/03, 2020/04) y quitamos el año.
+   '''
+   trimestrales = []
+   
+   for col in df.columns:
+       cjt = set()
+       filter = df[col].dropna()
+       filter= filter.to_frame().reset_index()
+       for fecha in filter['fechas']:
+          cjt.add(str(fecha)[-2:])
+
+       if cjt == {'01','02','03','04'}:
+          trimestrales.append(col)        
+   return trimestrales
+
+mapper = {
+    '01':'03',
+    '02':'06',
+    '03':'09',
+    '04':'12',
+}
+def trimestres_a_anual(df,columns):
+    trimes = df[columns].reset_index().dropna()
+    trimes['fechas'] = trimes['fechas'].apply(lambda x: str(x)[:-2] + mapper[ str(x)[-2:]]  ) 
+    return trimes
 
 
 
@@ -71,7 +111,7 @@ class Indicadores:
     # aquí falta un control de errores cuando no se pudo obtener la info y advirtiendo que se cheque bien el token
     def __request(self, liga_api):
         #print('liga de la api', liga_api)
-        req = requests.get(liga_api)
+        req = requests.get(liga_api, verify=False)
         assert req.status_code == 200, 'No se encontró información con las parámetros especificados.'
         data = json.loads(req.text)
         return data
@@ -541,16 +581,37 @@ if uploaded_file is not None:
       ## y de 2004 a 2004/01
 
       df.reset_index(inplace=True)
-
-      df['fechas'] = df['fechas'].apply(lambda x : x + '/01' if len(x)== 4 else x)
+      # f['fechas'] = df['fechas'].apply(lambda x : x + '/01' if len(x)== 4 else x)
+      df['fechas'] = df['fechas'].apply(lambda x : x + '/12' if len(x)== 4 else x)
 
       df = df.groupby('fechas', as_index=False).agg('first').sort_values(by='fechas', ascending = True)
+      
+      df.set_index('fechas', inplace=True)
+      trimestrales = get_trimestrales(df)
+      #st.write('trimestrales')
+      #st.write(trimestrales)
+      #print('trimestrales', trimestrales)
+      #st.write(df[trimestrales])
+
+      trimestrales_df = trimestres_a_anual(df, trimestrales)
+      #st.write('trimestrales df')
+      #st.write(trimestrales_df)
+      no_trimestrales = df[[col for col in df.columns if col not in trimestrales] ]
+      no_trimestrales.reset_index(inplace=True)
+      #st.write('no trimestrales')
+      #st.write(no_trimestrales)
+      df = no_trimestrales.merge(trimestrales_df, how='left',on='fechas')
 
       ## en la siguiente linea de codigo usamos dt.strftime('%Y-%m')
       ## para tener fechas del tipo 2010-02, 2010-03, etc.
       ## si queremos fechas con dia basta con usar dt.date
       df.fechas = pd.to_datetime(df.fechas, format='%Y/%m').dt.strftime('%Y-%m')
       df.set_index('fechas', inplace=True)
+
+
+
+
+      
 
       # Aqui es donde haremos el corte
       if fecha_inicio is not None:
@@ -560,6 +621,9 @@ if uploaded_file is not None:
         # Convertir el objeto de tipo date a datetime
         fecha_inicio = datetime.combine(fecha_inicio, datetime.min.time())
         fecha_fin = datetime.combine(fecha_fin, datetime.min.time())
+
+
+
 
         # Filtrar el DataFrame para obtener solo las filas dentro del intervalo de fechas
         df = df.loc[(pd.to_datetime(df.index) >= fecha_inicio) & (pd.to_datetime(df.index) <= fecha_fin)]
