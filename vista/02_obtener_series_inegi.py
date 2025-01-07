@@ -60,14 +60,13 @@ def get_trimestrales(df):
        cjt = set()
        count = 0
        filter = df[col].dropna()
-       filter= filter.to_frame().reset_index()
+       filter= filter.to_frame().reset_index().dropna()
        for fecha in filter['fechas']:
           cjt.add(str(fecha)[-2:])
           count += 1
           
-          if count >6:
-            if cjt == {'01','02','03','04'}:
-                trimestrales.append(col)
+          if count >6 and cjt == {'01','02','03','04'}:
+            trimestrales.append(col)
             break
                 
 
@@ -80,9 +79,14 @@ mapper = {
     '04':'12',
 }
 def trimestres_a_anual(df,columns):
-    trimes = df[columns].reset_index().dropna()
-    trimes['fechas'] = trimes['fechas'].apply(lambda x: str(x)[:-2] + mapper[ str(x)[-2:]]  ) 
-    return trimes
+    trimes = df[columns]
+    if not trimes.empty:
+        trimes = trimes.dropna().reset_index()
+        #st.write('trimes')
+        #st.write(trimes)
+        trimes['fechas'] = trimes['fechas'].apply(lambda x: str(x)[:-2] + mapper[ str(x)[-2:]]  ) 
+        return trimes
+    return pd.DataFrame()
 
 
 
@@ -598,6 +602,7 @@ if uploaded_file is not None:
       #st.write('trimestrales')
       #st.write(trimestrales)
       #print('trimestrales', trimestrales)
+      #st.write('df[trimestrales]')
       #st.write(df[trimestrales])
 
       trimestrales_df = trimestres_a_anual(df, trimestrales)
@@ -607,7 +612,7 @@ if uploaded_file is not None:
       no_trimestrales.reset_index(inplace=True)
       #st.write('no trimestrales')
       #st.write(no_trimestrales)
-      df = no_trimestrales.merge(trimestrales_df, how='left',on='fechas')
+      df = no_trimestrales.merge(trimestrales_df, how='left',on='fechas') if not trimestrales_df.empty else no_trimestrales
 
       ## en la siguiente linea de codigo usamos dt.strftime('%Y-%m')
       ## para tener fechas del tipo 2010-02, 2010-03, etc.

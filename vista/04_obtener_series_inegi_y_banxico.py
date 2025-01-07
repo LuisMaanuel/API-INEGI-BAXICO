@@ -343,11 +343,15 @@ mapper = {
     '04':'12',
 }
 def trimestres_a_anual(df,columns):
-    trimes = df[columns].reset_index().dropna()
-    trimes['fecha'] = trimes['fecha'].apply(lambda x: str(x)[:5] + mapper[ str(x)[5:7]] + str(x)[7:]  ) 
-    trimes.fecha = pd.to_datetime(trimes.fecha, format='%Y-%m-%d').dt.date
-    return trimes
-
+    trimes = df[columns]
+    if not trimes.empty:
+        trimes = trimes.dropna().reset_index()
+        #st.write('trimes')
+        #st.write(trimes)
+        trimes['fecha'] = trimes['fecha'].apply(lambda x: str(x)[:5] + mapper[ str(x)[5:7]] + str(x)[7:]  ) 
+        trimes.fecha = pd.to_datetime(trimes.fecha, format='%Y-%m-%d').dt.date
+        return trimes
+    return pd.DataFrame()
 
 
 
@@ -523,7 +527,7 @@ if uploaded_file:
       #st.write(no_trimestrales.dtypes)
       
       
-      df = no_trimestrales.merge(trimestrales_df, how='left',on='fecha')
+      df = no_trimestrales.merge(trimestrales_df, how='left',on='fecha') if not trimestrales_df.empty else no_trimestrales
       #st.write('df 2')
       #st.write(df)
 
