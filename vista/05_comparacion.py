@@ -42,17 +42,27 @@ def infer_format(date_str):
 
 
 def subtract_two_df(ruta1: pd.DataFrame = None, ruta2: pd.DataFrame = None, 
-                    fecha_inicio = None, fecha_fin = None):
+                    fecha_inicio = None, fecha_fin = datetime.now()):
     df1 = pd.read_excel(ruta1)
+    df1[df1.columns[0]] = df1[df1.columns[0]].apply(lambda x: str(x)[:10])
     st.write('- Datos anteriores')
     st.write(df1)
 
     df2 = pd.read_excel(ruta2)
+    df2[df2.columns[0]] = df2[df2.columns[0]].apply(lambda x: str(x)[:10])
     st.write('- Datos nuevos')
     st.write(df2)
+
+    formato_1 = infer_format(df1.iloc[0,0])
+    formato_2 = infer_format(df2.iloc[0,0])
     
-    df1[df1.columns[0]] = pd.to_datetime(df1[df1.columns[0]], ).dt.date
-    df2[df2.columns[0]] = pd.to_datetime(df2[df2.columns[0]], ).dt.date
+    # convertimos ambas fechas en el mismo formato
+    try:
+        df1[df1.columns[0]] = pd.to_datetime(df1[df1.columns[0]], format= formato_1).dt.date#strftime(formato_1)
+        df2[df2.columns[0]] = pd.to_datetime(df2[df2.columns[0]], format= formato_1).dt.date#strftime(formato_1)
+    except:
+        df1[df1.columns[0]] = pd.to_datetime(df1[df1.columns[0]], format= formato_2).dt.date#strftime(formato_2)
+        df2[df2.columns[0]] = pd.to_datetime(df2[df2.columns[0]], format= formato_2).dt.date#strftime(formato_2)
 
 
     if fecha_inicio:
@@ -60,7 +70,6 @@ def subtract_two_df(ruta1: pd.DataFrame = None, ruta2: pd.DataFrame = None,
         df2 = df2[ (fecha_inicio <= df2[df2.columns[0]] ) & ( df2[df2.columns[0]] <= fecha_fin)]
 
     df1.set_index(df1.columns[0],inplace=True)
-
     df2.set_index(df2.columns[0],inplace=True)
 
     return df1.subtract(df2).abs()
@@ -99,6 +108,8 @@ with st.sidebar:
 with st.sidebar:
     st.write('Ejemplo de datos anteriores:')
     datos_ant = load_excel('./catalogo/comparacion/datos_anteriores.xlsx')
+    datos_ant[datos_ant.columns[0]] = pd.to_datetime(datos_ant[datos_ant.columns[0]], format='Y%-m%-d%').dt.date
+
     excel_file = BytesIO()
     datos_ant.to_excel(excel_file, index=False, engine='xlsxwriter')
     excel_file.seek(0)
@@ -129,24 +140,44 @@ st.write('''Esta sección tiene la finalidad de comparar dos marcos de datos o _
 # Estructura de los datos a subir
 st.subheader("Estructura de los datos a subir", divider="orange")
 st.write('''Para un correcto funcionamiento, es importante que ambos archivos excel (.xlsx) **tenga el mismo nombrado de
-         las columnas. Con excepcion del nombre asigando a la columna de la fecha y seguir la siguiente estructura:''')
+         las columnas.** Con excepcion del nombre asigando a la columna de la fecha y debe seguir la siguiente estructura:''')
 
-st.write('''La primer columna debe corresponder a la fecha de los datos, en ambos archivos la siguiente columna hace referencia a la misma serie de datos económicos,
-         la tercer columna de ambos archivos hacen referencia a la misma serie de datos económicos, etc.''')
+st.write('- La primer columna de ambos archivos debe corresponder a la fecha de los datos. ') 
 
+st.write('- la siguiente columna en ambos archivos debe hacer referencia a la misma serie de datos económicos (supongamos PIB).')
+st.write('''- la tercer columna en  ambos archivos hacen referencia a la misma serie de datos económicos (supongamos el precio de venta del dolar)
+            y asi sucesivamente con las demas columnas''')
+
+st.subheader('Ejemplo de estructura de los archivos')
 st.write('- Datos anteriores')
 df1 = load_excel('./catalogo/comparacion/datos_anteriores.xlsx')
-df1.set_index(df1.columns[0], inplace=True)
+df1[df1.columns[0]] = df1[df1.columns[0]].apply(lambda x: str(x)[:10])
 st.write(df1)
 
 st.write('- Datos nuevos')
 df2 = load_excel('./catalogo/comparacion/datos_nuevos.xlsx')
-
-df2.set_index(df2.columns[0], inplace=True)
+df2[df2.columns[0]] = df2[df2.columns[0]].apply(lambda x: str(x)[:10])
 st.write(df2)
 
 st.write('- Resultado')
-st.write(df1.subtract(df2))
+
+
+formato_1 = infer_format(df1.iloc[0,0])
+formato_2 = infer_format(df2.iloc[0,0])
+    
+# convertimos ambas fechas en el mismo formato
+try:
+    df1[df1.columns[0]] = pd.to_datetime(df1[df1.columns[0]], format= formato_1).dt.date#strftime(formato_1)
+    df2[df2.columns[0]] = pd.to_datetime(df2[df2.columns[0]], format= formato_1).dt.date#strftime(formato_1)
+except:
+    df1[df1.columns[0]] = pd.to_datetime(df1[df1.columns[0]], format= formato_2).dt.date#strftime(formato_2)
+    df2[df2.columns[0]] = pd.to_datetime(df2[df2.columns[0]], format= formato_2).dt.date#strftime(formato_2)
+
+
+df1.set_index(df1.columns[0],inplace=True)
+df2.set_index(df2.columns[0],inplace=True)
+
+st.write( df1.subtract(df2).abs())
 
 
 
@@ -279,15 +310,6 @@ if file1 and file2:
     )
 
 
-
-    # descarga de los datos en caso de ser necesario
-    excel_file = BytesIO()
-    df.reset_index().to_excel(excel_file, index=False, engine='xlsxwriter')
-    excel_file.seek(0)
-    st.download_button(label='Descarga de datos Excel 📥',
-                       data=excel_file,
-                       file_name='comparacion.xlsx',
-                       key='donwload_button_3')
     
     st.subheader("Descargar variables", divider="green")
     # Crearemos un archivo de Excel con BytesIO (Para cargarlo en memoria)
@@ -322,6 +344,6 @@ if file1 and file2:
     st.download_button(
         label="Descargar variables Excel 📥",
         data=excel_file,
-        file_name='variables_usuario_inegi.xlsx',
+        file_name='comparacion.xlsx',
         key='download_button'
      )

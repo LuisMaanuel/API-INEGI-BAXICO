@@ -20,7 +20,7 @@ icon = "📙"
 
 [[pages]]
 path = "vista/05_comparacion.py"
-name = "Comparacion de datos"
+name = "COMPARACION DE DATOS"
 icon = "🆚"
 
 [[pages]]
