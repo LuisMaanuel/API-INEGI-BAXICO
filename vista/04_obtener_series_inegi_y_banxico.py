@@ -603,6 +603,9 @@ if uploaded_file:
 
 
 
+# -----------------------------
+# -----------------------------                 Estadisticas, minimo, maximo, promedio
+# -----------------------------
 
 
 
@@ -656,10 +659,9 @@ if uploaded_file:
     df_dash = pd.DataFrame(
        {
               
-              "Variable": rutas_variables_usuario['NombreVariable'],                            
-              "Historia": [(df[col].dropna()).tolist() for col in rutas_variables_usuario['NombreVariable']],
-              "Ruta": rutas_variables_usuario["RutaCompleta"],
-          }
+              "Variable": df.columns,                            
+              "Historia": [(df[col].dropna()).tolist() for col in df.columns],
+              }
       )
     st.dataframe(
       df_dash,

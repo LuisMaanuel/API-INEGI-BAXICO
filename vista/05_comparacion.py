@@ -63,7 +63,7 @@ def subtract_two_df(ruta1: pd.DataFrame = None, ruta2: pd.DataFrame = None,
 
     df2.set_index(df2.columns[0],inplace=True)
 
-    return df1.subtract(df2)
+    return df1.subtract(df2).abs()
 
 
 
@@ -193,27 +193,54 @@ if file1 and file2:
     st.write('- Resultado')
     st.write(df)
 
-    # descarga de los datos en caso de ser necesario
-    excel_file = BytesIO()
-    df.reset_index().to_excel(excel_file, index=False, engine='xlsxwriter')
-    excel_file.seek(0)
-    st.download_button(label='Descarga de datos Excel 📥',
-                       data=excel_file,
-                       file_name='comparacion.xlsx',
-                       key='donwload_button_3')
-    
 
 
 
 # -----------------------------
-# -----------------------------                 Graficas
+# -----------------------------                 Graficas de estadisticas y del historico
 # -----------------------------
 
     st.subheader('Visualización', divider='orange')
 
+    # -----------------------------             Estadisticas, minimo, maximo, promedio
+    desc_stats = df.describe().T
+    #desc_stats = desc_stats.merge(df.sum().to_frame('sum'), left_index=True, right_index=True)
+    fig = px.bar(
+        df.sum().to_frame('sum').reset_index(),
+        x="index",  # Estadísticas en el eje X
+        y="sum",  # Valores en el eje Y
+        title="Suma de las diferencias",
+        )
+    st.plotly_chart(fig)
+
+    # seleccionando las estadisticas
+    desc_stats = desc_stats[['mean','min','max']].T
+    desc_stats.reset_index(inplace=True)
+
+    # transformando el DF para poder graficar
+    desc_stats_long = desc_stats.melt(id_vars='index',var_name='Column',value_name='Value')
+
+
+    fig = px.bar(
+        desc_stats_long,
+        x="index",  # Estadísticas en el eje X
+        y="Value",  # Valores en el eje Y
+        color="Column",  # Diferenciación por columna (hue)
+        barmode="group",  # Agrupar barras
+        title="Gráfico de estadísticas descriptivas",
+        labels={"index": "Estadística", "Value": "Valor", "Column": "Columna"},
+        )
+    st.plotly_chart(fig)
+
+
+
+
+    # -----------------------------             historico
+
     selected_variable = st.selectbox('Selecciona la variable a graficar:', df.columns)
     # Crear y mostrar la gráfica de líneas
     df_sin_nans = df[selected_variable].dropna()
+
     fig = px.line(df_sin_nans, y=selected_variable) #title=" ".join(selected_variable.split(" ")[1:]))
     # Agregar el subtítulo mediante annotations
     fig.update_layout(
@@ -223,7 +250,7 @@ if file1 and file2:
                 y=1.21 - (0.05*(i+1)),  # Posición en el eje Y (negativo para colocarlo debajo del título principal)
                 xref="paper",
                 yref="paper",
-                text= nombre + ">",
+                text='',
                 showarrow=False,
                 font=dict(size=14)  # Tamaño de fuente del subtítulo
         )
@@ -232,3 +259,69 @@ if file1 and file2:
     )
 
     st.plotly_chart(fig)
+    
+    
+    df_dash = pd.DataFrame(
+        {"Variable": df.columns,
+         "Historia": [(df[col].dropna()).tolist() for col in df.columns],
+        }
+      )
+    
+    st.dataframe(
+        df_dash,
+        column_config={
+            "Variable": "Nombre de la variable",
+            "Historia": st.column_config.LineChartColumn(
+                "Historia"
+                            ),
+                        },
+    hide_index=True,
+    )
+
+
+
+    # descarga de los datos en caso de ser necesario
+    excel_file = BytesIO()
+    df.reset_index().to_excel(excel_file, index=False, engine='xlsxwriter')
+    excel_file.seek(0)
+    st.download_button(label='Descarga de datos Excel 📥',
+                       data=excel_file,
+                       file_name='comparacion.xlsx',
+                       key='donwload_button_3')
+    
+    st.subheader("Descargar variables", divider="green")
+    # Crearemos un archivo de Excel con BytesIO (Para cargarlo en memoria)
+    excel_file = BytesIO()
+   
+    # Obtenemos todas sus graficas
+    imgs_bytes = []
+    for i, col in enumerate(df.columns):       
+        fig_ = px.line(df[col].dropna(), y=col,  title=" ".join(col.split(" ")[1:]))
+        imgs_bytes.append(BytesIO())
+        fig_.write_image(imgs_bytes[i], format='png')
+
+   # Crear un objeto pd.ExcelWriter que escribe en el objeto BytesIO
+    with pd.ExcelWriter(excel_file, engine='xlsxwriter') as writer:
+      # Agregar el DataFrame a la primera hoja
+      df.to_excel(writer, sheet_name='Datos', index=True)
+      # Agregamos imagenes
+      for i, img_bytes1 in enumerate(imgs_bytes):
+        df_img1 = pd.DataFrame({'image': [img_bytes1.getvalue()]})
+        df_img1.to_excel(writer, sheet_name='Graficas', index=False, header=False, startrow=i*15, startcol=0)
+        
+        workbook = writer.book
+        worksheet = writer.sheets['Graficas']
+        # Crear objetos Image para cada gráfica y agregarlos a la hoja
+        worksheet.insert_image(f'A{1 if i==0 else i*26}', 'grafica_linea_{i}.png', {'image_data': img_bytes1})
+
+  #     pio.write_excel(fig, excel_file, sheet_name='graficas')
+   
+    #df.to_excel(excel_file, index=True, engine='xlsxwriter')
+    excel_file.seek(0)
+    # Descargar el archivo Excel
+    st.download_button(
+        label="Descargar variables Excel 📥",
+        data=excel_file,
+        file_name='variables_usuario_inegi.xlsx',
+        key='download_button'
+     )
