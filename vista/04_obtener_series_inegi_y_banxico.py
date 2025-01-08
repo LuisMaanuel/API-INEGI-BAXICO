@@ -305,7 +305,7 @@ def obtener_serie_BANXICO(ruta_archivo: pd.DataFrame, formato:str, token:str = "
 
 
 
-def get_trimestrales(df):
+def get_trimestrales(df, cjt_fechas: dict = {'01','02','03','04'}):
    '''
    Parameters: df, pandas dataframe donde el index es la fecha
    Return: Lista con los nombres de las series trimestrales
@@ -314,8 +314,15 @@ def get_trimestrales(df):
    2010 hasta el 2020 entonces tenemos 10 años, por  lo que la serie trimestral debe tener mas de 3 registros al año y a lo mas 4
    lo cual nos da una cota en el ejemplo de mas 30 registros y a lo mas 40.
    
-   CReamos un conjunto {01, 02, 03, 04} e iteramos sobre las fechas de cada serie donde si tenemos registros validos
+   Creamos un conjunto {01, 02, 03, 04} e iteramos sobre las fechas de cada serie donde si tenemos registros validos
    (2020/01, 2020/02, 2020/03, 2020/04) y quitamos el año.
+
+
+
+
+   Nota: Esta funcion esta diseñada para identificar series trimestrales por el el conjunto cjt_fechas, pero si dicho conjunto
+   se modifica a {'01','02','03'} la funcion detectaria series cuatrimestrales (pues solo hay 3 cuatrimestres por año).
+   Asi que es importante llamar la funcion con un cjt_fechas adecuado segun sean las series que se quieren detectar.
    '''
    trimestrales = []
 
@@ -330,7 +337,7 @@ def get_trimestrales(df):
           count += 1
           
           if count >6:
-            if cjt == {'01','02','03','04'}:
+            if cjt == cjt_fechas:
                 trimestrales.append(col)
             break                
 
@@ -342,7 +349,14 @@ mapper = {
     '03':'09',
     '04':'12',
 }
-def trimestres_a_anual(df,columns):
+def trimestres_a_anual(df,columns, mapper: dict = mapper):
+    '''
+    esta funcion convierte no solo fechas trimestrales del tipo 2020/01, 2020/02, 2020/03 y 2020/04 al fechas mensuales
+    del tipo 2020/03, 2020/06, 2020/09 y 2020/12. Ya que depende el mapper (diccionario) que se le ingrese, por defecto
+    este diseñado para convertir fechas trimestrales a mensuales.
+    
+    Pero esta funcion sirve para convertir bimestrales, cuatrimestrales etc. A fechas mensuales dependiendo del mapper
+    '''
     trimes = df[columns]
     if not trimes.empty:
         trimes = trimes.dropna().reset_index()
@@ -515,7 +529,7 @@ if uploaded_file:
       
       ## encontramos las series trimestrales y las ponemos en el formato adecuado
       trimestrales = get_trimestrales(df)
-      trimestrales_df = trimestres_a_anual(df, trimestrales)
+      trimestrales_df = trimestres_a_anual(df, trimestrales, mapper)
       #st.write('trimestrales df')
       #st.write(trimestrales_df)
       #st.write(trimestrales_df.dtypes)
