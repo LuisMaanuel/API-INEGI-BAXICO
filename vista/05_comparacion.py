@@ -72,7 +72,7 @@ def subtract_two_df(ruta1: pd.DataFrame = None, ruta2: pd.DataFrame = None,
     df1.set_index(df1.columns[0],inplace=True)
     df2.set_index(df2.columns[0],inplace=True)
 
-    return df1.subtract(df2).abs()
+    return df1.subtract(df2)#.abs()
 
 
 
@@ -149,6 +149,7 @@ st.write('''- la tercer columna en  ambos archivos hacen referencia a la misma s
             y asi sucesivamente con las demas columnas''')
 
 st.subheader('Ejemplo de estructura de los archivos')
+
 st.write('- Datos anteriores')
 df1 = load_excel('./catalogo/comparacion/datos_anteriores.xlsx')
 df1[df1.columns[0]] = df1[df1.columns[0]].apply(lambda x: str(x)[:10])
@@ -177,7 +178,7 @@ except:
 df1.set_index(df1.columns[0],inplace=True)
 df2.set_index(df2.columns[0],inplace=True)
 
-st.write( df1.subtract(df2).abs())
+st.write( df1.subtract(df2))
 
 
 
@@ -223,7 +224,9 @@ if file1 and file2:
     df = subtract_two_df(file1, file2,fecha_inicio, fecha_fin)
     st.write('- Resultado')
     st.write(df)
-
+    st.write('''**OBSERVACION** Si el resultado marca filas con valores nulos (None) quiere decir que los rangos de fechas
+                entre los archivos son distintos, es decir, un archivo si tiene registros en esas fechas pero el otro archivo
+                no, **por lo cual es importante especificar el rango de las fechas**''')
 
 
 
@@ -233,23 +236,47 @@ if file1 and file2:
 
     st.subheader('Visualización', divider='orange')
 
+    df_abs = df.abs()
+    desc_stats_ = df_abs.describe()
+
+    col1, col2 = st.columns(2)
+    with col1:
+        variables = st.multiselect('Seleccione las variables a graficar', ['Seleccionar todas'] + df.columns.to_list())
+        variables  = df.columns if 'Seleccionar todas' in variables  or not variables else variables
+    with col2:
+        estadisticos = st.multiselect('Seleccione las estadisticas deseadas', ['Todos los estadisticos','promedio','min','max'])
+        estadisticos = ['promedio','min','max'] if 'Todos los estadisticos' in estadisticos or not estadisticos else estadisticos
+
+
     # -----------------------------             Estadisticas, minimo, maximo, promedio
-    desc_stats = df.describe().T
+    desc_stats = desc_stats_[variables].T
+
     #desc_stats = desc_stats.merge(df.sum().to_frame('sum'), left_index=True, right_index=True)
     fig = px.bar(
-        df.sum().to_frame('sum').reset_index(),
-        x="index",  # Estadísticas en el eje X
+        df_abs[variables].sum().to_frame('sum').reset_index().rename(columns={'index':'Variables'}),
+        x="Variables",  # Estadísticas en el eje X
         y="sum",  # Valores en el eje Y
         title="Suma de las diferencias",
         )
     st.plotly_chart(fig)
 
     # seleccionando las estadisticas
-    desc_stats = desc_stats[['mean','min','max']].T
+    desc_stats = desc_stats.rename(columns={'mean':'promedio'})[estadisticos + ['std']].T
     desc_stats.reset_index(inplace=True)
+
 
     # transformando el DF para poder graficar
     desc_stats_long = desc_stats.melt(id_vars='index',var_name='Column',value_name='Value')
+
+    # Filtrando solo la desviación estándar y reorganizando los datos
+    desviacion_data = desc_stats.loc[desc_stats['index'] == 'std']
+    desviacion_melted = desviacion_data.melt(id_vars='index', var_name='Column', value_name='Error')
+
+    # Filtrando solo el promedio y añadiendo la desviación estándar como error
+    promedios = desc_stats_long[desc_stats_long['index'] == 'promedio'].copy()
+
+    # Fusionar la desviación estándar con los promedios
+    promedios = promedios.merge(desviacion_melted[['Column', 'Error']], on='Column', how='left')
 
 
     fig = px.bar(
@@ -261,13 +288,20 @@ if file1 and file2:
         title="Gráfico de estadísticas descriptivas",
         labels={"index": "Estadística", "Value": "Valor", "Column": "Columna"},
         )
+    
+    # Filtrar las barras de promedio y añadir barras de error
+    for trace in fig.data:
+        if 'promedio' in desc_stats_long[desc_stats_long['Column'] == trace.name]['index'].values:
+            promedio_data = promedios[promedios['Column'] == trace.name]
+            trace.error_y = dict(type='data', array=promedio_data['Error'])
+    
     st.plotly_chart(fig)
 
 
 
 
     # -----------------------------             historico
-
+    st.subheader('Historicos',divider='orange')
     selected_variable = st.selectbox('Selecciona la variable a graficar:', df.columns)
     # Crear y mostrar la gráfica de líneas
     df_sin_nans = df[selected_variable].dropna()
@@ -292,26 +326,9 @@ if file1 and file2:
     st.plotly_chart(fig)
     
     
-    df_dash = pd.DataFrame(
-        {"Variable": df.columns,
-         "Historia": [(df[col].dropna()).tolist() for col in df.columns],
-        }
-      )
-    
-    st.dataframe(
-        df_dash,
-        column_config={
-            "Variable": "Nombre de la variable",
-            "Historia": st.column_config.LineChartColumn(
-                "Historia"
-                            ),
-                        },
-    hide_index=True,
-    )
-
 
     
-    st.subheader("Descargar variables", divider="green")
+    st.subheader("Descargar variables", divider="orange")
     # Crearemos un archivo de Excel con BytesIO (Para cargarlo en memoria)
     excel_file = BytesIO()
    
@@ -326,6 +343,7 @@ if file1 and file2:
     with pd.ExcelWriter(excel_file, engine='xlsxwriter') as writer:
       # Agregar el DataFrame a la primera hoja
       df.to_excel(writer, sheet_name='Datos', index=True)
+      desc_stats.rename(columns={'index':'Estadistica'}).to_excel(writer, sheet_name= 'Estadisticas', index=False)
       # Agregamos imagenes
       for i, img_bytes1 in enumerate(imgs_bytes):
         df_img1 = pd.DataFrame({'image': [img_bytes1.getvalue()]})
