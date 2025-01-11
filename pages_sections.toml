@@ -3,15 +3,15 @@ path = "vista/01_introduccion.py"
 name = "INTRODUCCION"
 icon = "🏠"
 
-[[pages]]
-path = "vista/02_obtener_series_inegi.py"
-name = "INEGI"
-icon = "📗"
+#[[pages]]
+#path = "vista/02_obtener_series_inegi.py"
+#name = "INEGI"
+#icon = "📗"
 
-[[pages]]
-path = "vista/03_obtener_series_banxico.py"
-name = "BANXICO"
-icon = "📘"
+#[[pages]]
+#path = "vista/03_obtener_series_banxico.py"
+#name = "BANXICO"
+#icon = "📘"
 
 [[pages]]
 path = "vista/04_obtener_series_inegi_y_banxico.py"
