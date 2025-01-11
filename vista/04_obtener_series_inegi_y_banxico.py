@@ -305,7 +305,7 @@ def obtener_serie_BANXICO(ruta_archivo: pd.DataFrame, formato:str, token:str = "
 
 
 
-def get_trimestrales(df, cjt_fechas: dict = {'01','02','03','04'}):
+def get_trimestrales(df, cjt_fechas: dict = {'01','02','03','04'}, diaria:bool = False):
    '''
    Parameters: df, pandas dataframe donde el index es la fecha
    Return: Lista con los nombres de las series trimestrales
@@ -333,13 +333,17 @@ def get_trimestrales(df, cjt_fechas: dict = {'01','02','03','04'}):
        filter = df[col].dropna()
        filter= filter.to_frame().reset_index()
        for fecha in filter['fecha']:
-          cjt.add(str(fecha)[5:7])
+          cjt.add(str(fecha)[5:7] if not diaria else str(fecha)[-2:]) # esta condicion nos ayuda a detectar series diarias
           count += 1
-          
-          if count >6:
-            if cjt == cjt_fechas:
-                trimestrales.append(col)
-            break                
+        
+          if count == 13:        
+            if diaria and len(cjt) > 6:
+              trimestrales.append(col) 
+
+            else:
+               if cjt == cjt_fechas:
+                  trimestrales.append(col)
+            break
 
    return trimestrales
 
@@ -524,28 +528,82 @@ if uploaded_file:
       ## se juntan los datos de inegi y banxico
       df = pd.concat([df_inegi, df_banxico]).groupby('fecha', as_index=False).agg('first')\
           .sort_values(by='fecha',ascending=True).set_index('fecha')
-      #st.write('df')
-      #st.write(df)
+
+
+      ## encontramos las series bimestrales, trimestrales, cuatrimestrales, semestrales y las ponemos en el formato adecuado
+      columns = df.columns.to_list()
+      dfs_temporales = []
+      for (cjt, freq) in [({f'0{i}' if i < 10 else str(i) for i in range(1,31)} , True), 
+                          ({'01','02','03','04','05','06'}, False),
+                          ({'01','02','03','04'}, False),
+                          ({'01','02','03'}, False), ({'01','02'}, False) ]:
+        
+        # obtenemos los nombres de las series
+        temporales_nombres = get_trimestrales(df[columns], cjt, diaria= freq)
+        # actualizamos los nombres de las columnas restantes
+        columns = [name for name in columns if name not in temporales_nombres]
+
+        # si es serie diaria almacenamos el nombre para darle un tratamiento especifico
+        if freq: 
+           diarias_names = temporales_nombres
+
+        # en caso contrario convertimos las fechas y agregamos el df a una lista
+        else:
+          dfs_temporales.append( trimestres_a_anual(df, temporales_nombres) )
       
-      ## encontramos las series trimestrales y las ponemos en el formato adecuado
-      trimestrales = get_trimestrales(df)
-      trimestrales_df = trimestres_a_anual(df, trimestrales, mapper)
+      # mostramos un df con las series diarias
+      st.write('diarias')
+      st.write(diarias_names)
+      df_diario = df[diarias_names].dropna()
+      st.write(df_diario)
+
+
+      ## obtenemos el ultimo registro de cada serie diaria para agregarlos al df de series mensuales
+
+      df_diario.reset_index(inplace=True)
+      df_diario["fecha"] = pd.to_datetime(df_diario["fecha"])
+      ultimo_por_mes = df_diario.groupby(df_diario["fecha"].dt.to_period("M"), as_index=False).last()
+      
+      ultimo_por_mes["fecha"] = pd.to_datetime(ultimo_por_mes["fecha"]).dt.date
+
+
+
+
+      # agregamos el df mensualizado a la lista de todos los dfs
+      dfs_temporales.append(ultimo_por_mes)
+      
+      
+      # obtenemos un dataframe donde las series existentes son solamente mensuales
+      # lo usaremos para unir los demas data frames
+      df = df[columns]
+      
+
+      # unimos todos los dfs
+      for df_temporal in dfs_temporales:
+         df = df.merge(df_temporal, how='left',on='fecha') if not df_temporal.empty else df
+      
+
+         
+#      trimestrales = get_trimestrales(df)
+#      trimestrales_df = trimestres_a_anual(df, trimestrales, mapper)
       #st.write('trimestrales df')
       #st.write(trimestrales_df)
       #st.write(trimestrales_df.dtypes)
 
-      no_trimestrales = df[[col for col in df.columns if col not in trimestrales] ]
-      no_trimestrales.reset_index(inplace=True)
+#      no_trimestrales = df[[col for col in df.columns if col not in trimestrales] ]
+#      no_trimestrales.reset_index(inplace=True)
       #st.write('no trimestrales')
       #st.write(no_trimestrales)
       #st.write(no_trimestrales.dtypes)
       
       
-      df = no_trimestrales.merge(trimestrales_df, how='left',on='fecha') if not trimestrales_df.empty else no_trimestrales
+#      df = no_trimestrales.merge(trimestrales_df, how='left',on='fecha') if not trimestrales_df.empty else no_trimestrales
       #st.write('df 2')
       #st.write(df)
 
+      #df.reset_index(True)
       df.fecha = pd.to_datetime(df.fecha, format='%Y/%m/%d').dt.date
+      df_diario['fecha'] = pd.to_datetime(df_diario['fecha']).dt.date
       #df.set_index('fecha', inplace=True)
 
 
@@ -555,8 +613,9 @@ if uploaded_file:
       if fecha_inicio:
 
         df = df[(df.fecha >= fecha_inicio) & (df.fecha <= fecha_fin)]
+        df_diario = df_diario[(df_diario.fecha >= fecha_inicio) & (df_diario.fecha <= fecha_fin)]
       df.set_index('fecha', inplace=True)
-        
+      df.dropna(inplace=True, how='all')
 
       
       df.columns = [' '.join(col.strip().split()) for col in df.columns]
@@ -694,7 +753,7 @@ if uploaded_file:
    
     # Obtenemos todas sus graficas
     imgs_bytes = []
-    for i, col in enumerate(df.columns):       
+    for i, col in enumerate(df.columns):
       fig_ = px.line(df[col].dropna(), y=col,  title=" ".join(col.split(" ")[1:]))
       imgs_bytes.append(BytesIO())
       fig_.write_image(imgs_bytes[i], format='png')
@@ -703,6 +762,9 @@ if uploaded_file:
     with pd.ExcelWriter(excel_file, engine='xlsxwriter') as writer:
       # Agregar el DataFrame a la primera hoja
       df.to_excel(writer, sheet_name='Datos', index=True)
+
+      df_diario['fecha'] = pd.to_datetime(df_diario['fecha']).dt.date
+      df_diario.to_excel(writer, sheet_name='Diarias', index=False)
       # Agregamos imagenes
       for i, img_bytes1 in enumerate(imgs_bytes):    
         df_img1 = pd.DataFrame({'image': [img_bytes1.getvalue()]})
@@ -721,7 +783,7 @@ if uploaded_file:
     st.download_button(
       label="Descargar variables Excel 📥",
       data=excel_file,
-      file_name='variables_usuario_inegi.xlsx',
+      file_name='variables_usuario.xlsx',
       key='download_button'
       )
     
