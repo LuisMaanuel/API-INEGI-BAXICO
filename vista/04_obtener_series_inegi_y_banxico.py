@@ -568,12 +568,8 @@ if uploaded_file:
  
         #st.write('ultimo por mes')
         #st.write(ultimo_por_mes)
-
-
-
-
-      # agregamos el df mensualizado a la lista de todos los dfs
-      dfs_temporales.append(ultimo_por_mes)
+        # agregamos el df mensualizado a la lista de todos los dfs
+        dfs_temporales.append(ultimo_por_mes)
       
       
       # obtenemos un dataframe donde las series existentes son solamente mensuales

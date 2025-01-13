@@ -237,7 +237,8 @@ if file1 and file2:
     st.subheader('Visualización', divider='orange')
 
     df_abs = df.abs()
-    desc_stats_ = df_abs.describe()
+    desc_stats_ =  df_abs.describe() 
+    #describe = desc_stats_.copy()
 
     col1, col2 = st.columns(2)
     with col1:
@@ -250,6 +251,7 @@ if file1 and file2:
 
     # -----------------------------             Estadisticas, minimo, maximo, promedio
     desc_stats = desc_stats_[variables].T
+    desc_stats_ = desc_stats_.T
 
     #desc_stats = desc_stats.merge(df.sum().to_frame('sum'), left_index=True, right_index=True)
     fig = px.bar(
@@ -262,7 +264,10 @@ if file1 and file2:
 
     # seleccionando las estadisticas
     desc_stats = desc_stats.rename(columns={'mean':'promedio'})[estadisticos + ['std']].T
+    desc_stats_ = desc_stats_.rename(columns={'mean':'promedio'})[['min','max','promedio','std']].T
+
     desc_stats.reset_index(inplace=True)
+    desc_stats_.reset_index(inplace=True)
 
 
     # transformando el DF para poder graficar
@@ -343,7 +348,7 @@ if file1 and file2:
     with pd.ExcelWriter(excel_file, engine='xlsxwriter') as writer:
       # Agregar el DataFrame a la primera hoja
       df.to_excel(writer, sheet_name='Datos', index=True)
-      desc_stats.rename(columns={'index':'Estadistica'}).to_excel(writer, sheet_name= 'Estadisticas', index=False)
+      desc_stats_.rename(columns={'index':'Estadistica'}).to_excel(writer, sheet_name= 'Estadisticas', index=False)
       # Agregamos imagenes
       for i, img_bytes1 in enumerate(imgs_bytes):
         df_img1 = pd.DataFrame({'image': [img_bytes1.getvalue()]})
