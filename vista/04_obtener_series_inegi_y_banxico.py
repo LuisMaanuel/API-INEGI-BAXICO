@@ -561,13 +561,16 @@ if uploaded_file:
         ## obtenemos el ultimo registro de cada serie diaria para agregarlos al df de series mensuales
         df_diario.reset_index(inplace=True)
         df_diario["fecha"] = pd.to_datetime(df_diario["fecha"])
-        ultimo_por_mes = df_diario.groupby(df_diario["fecha"].dt.to_period("M"), as_index=False).first()
-#        ultimo_por_mes['fecha'] = ultimo_por_mes['fecha'].apply(lambda x: str(x)[:-2] + '01')  
+        # obtenemos el ultimo registro de cada mes de las series diarias (si se neceista el 1ro se debe usar 'first')
+        ultimo_por_mes = df_diario.groupby(df_diario["fecha"].dt.to_period("M"), as_index=False).agg('last')
+
+        # le damos el formato para que sea el primer dia del mes, es decir, 01 y lo convertimos a fecha
+        ultimo_por_mes['fecha'] = ultimo_por_mes['fecha'].dt.to_period("M").dt.to_timestamp("D")
         ultimo_por_mes["fecha"] = pd.to_datetime(ultimo_por_mes["fecha"]).dt.date
 #        ultimo_por_mes['fecha'] = ultimo_por_mes['fecha'].dt.to_period("M").dt.to_timestamp("D")
  
-        #st.write('ultimo por mes')
-        #st.write(ultimo_por_mes)
+        st.write('ultimo por mes despues')
+        st.write(ultimo_por_mes)
         # agregamos el df mensualizado a la lista de todos los dfs
         dfs_temporales.append(ultimo_por_mes)
       
