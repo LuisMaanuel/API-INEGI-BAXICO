@@ -569,8 +569,8 @@ if uploaded_file:
         ultimo_por_mes["fecha"] = pd.to_datetime(ultimo_por_mes["fecha"]).dt.date
 #        ultimo_por_mes['fecha'] = ultimo_por_mes['fecha'].dt.to_period("M").dt.to_timestamp("D")
  
-        st.write('ultimo por mes despues')
-        st.write(ultimo_por_mes)
+        #st.write('ultimo por mes despues')
+        #st.write(ultimo_por_mes)
         # agregamos el df mensualizado a la lista de todos los dfs
         dfs_temporales.append(ultimo_por_mes)
       
