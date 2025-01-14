@@ -701,6 +701,11 @@ if uploaded_file:
     fig = px.line(df_sin_nans, y=selected_variable)
 
     fig.update_layout(
+      xaxis= dict(title='fecha',
+                  tickformat='%b %Y',
+                  tickangle=0,
+                  title_standoff=10),
+
       annotations = [
          dict(
             x=0.0,  # Posición en el eje X (0.5 = centrado)
@@ -744,6 +749,13 @@ if uploaded_file:
     imgs_bytes = []
     for i, col in enumerate(df.columns):
       fig_ = px.line(df[col].dropna(), y=col,  title=" ".join(col.split(" ")[1:]))
+      fig_.update_layout(
+              xaxis= dict(title='fecha',
+                  tickformat='%b %Y',
+                  tickangle=0,
+                  title_standoff=10),
+                  )
+                  
       imgs_bytes.append(BytesIO())
       fig_.write_image(imgs_bytes[i], format='png')
 
