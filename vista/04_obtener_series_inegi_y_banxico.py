@@ -553,6 +553,7 @@ if uploaded_file:
             dfs_temporales.append( df_trimestral )
 
           else:
+            df_trimestral = pd.DataFrame()
             dfs_temporales.append( trimestres_a_anual(df, temporales_nombres) )
       
       if diarias_names:
@@ -567,12 +568,13 @@ if uploaded_file:
         # le damos el formato para que sea el primer dia del mes, es decir, 01 y lo convertimos a fecha
         ultimo_por_mes['fecha'] = ultimo_por_mes['fecha'].dt.to_period("M").dt.to_timestamp("D")
         ultimo_por_mes["fecha"] = pd.to_datetime(ultimo_por_mes["fecha"]).dt.date
-#        ultimo_por_mes['fecha'] = ultimo_por_mes['fecha'].dt.to_period("M").dt.to_timestamp("D")
- 
-        #st.write('ultimo por mes despues')
-        #st.write(ultimo_por_mes)
+
         # agregamos el df mensualizado a la lista de todos los dfs
         dfs_temporales.append(ultimo_por_mes)
+        df_diario_exist = True
+      else:
+        df_diario = pd.DataFrame()
+        df_diario_exist = False
       
       
       # obtenemos un dataframe donde las series existentes son solamente mensuales
@@ -585,9 +587,11 @@ if uploaded_file:
          df = df.merge(df_temporal, how='left',on='fecha') if not df_temporal.empty else df
       
 
-         
+      if 'fecha' in df.index.names:
+        df.reset_index(inplace=True)
+  
       #df.reset_index(True)
-      df.fecha = pd.to_datetime(df.fecha, format='%Y/%m/%d').dt.date
+      df['fecha'] = pd.to_datetime(df['fecha'], format='%Y/%m/%d').dt.date
       if not df_diario.empty:
         df_diario['fecha'] = pd.to_datetime(df_diario['fecha']).dt.date
       if not df_trimestral.empty:
@@ -765,7 +769,7 @@ if uploaded_file:
       df.to_excel(writer, sheet_name='Datos', index=True)
       
       # agregamos el df de las series diarias a otra hoja
-      if not df_diario.empty:
+      if not df_diario.empty:#not df_diario.empty:
         df_diario['fecha'] = pd.to_datetime(df_diario['fecha']).dt.date
         df_diario.to_excel(writer, sheet_name='Diarias', index=False)
 
