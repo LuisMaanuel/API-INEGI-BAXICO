@@ -755,7 +755,7 @@ if uploaded_file:
                   tickangle=0,
                   title_standoff=10),
                   )
-                  
+
       imgs_bytes.append(BytesIO())
       fig_.write_image(imgs_bytes[i], format='png')
 
@@ -772,14 +772,22 @@ if uploaded_file:
       # agregamos el df de las series trimestrales a otra hoja
       if not df_trimestral.empty:
         df_trimestral.to_excel(writer, sheet_name='Trimestrales', index=False)
-      
+
+
+      workbook = writer.book
+      worksheet = workbook.add_worksheet('Graficas')
+      writer.sheets['Graficas'] = worksheet
+
+      # formato para texto blanco
+      white_text_format = workbook.add_format({'font_color': 'white'})      
+  
       # Agregamos imagenes
       for i, img_bytes1 in enumerate(imgs_bytes):    
         df_img1 = pd.DataFrame({'image': [img_bytes1.getvalue()]})
-        df_img1.to_excel(writer, sheet_name='Graficas', index=False, header=False, startrow=i*15, startcol=0)
+  #      df_img1.to_excel(writer, sheet_name='Graficas', index=False, header=False, startrow=i*15, startcol=0)
         
-        workbook = writer.book
-        worksheet = writer.sheets['Graficas']
+  #      workbook = writer.book
+  #      worksheet = writer.sheets['Graficas']
         # Crear objetos Image para cada gráfica y agregarlos a la hoja
         worksheet.insert_image(f'A{1 if i==0 else i*26}', 'grafica_linea_{i}.png', {'image_data': img_bytes1})
 
