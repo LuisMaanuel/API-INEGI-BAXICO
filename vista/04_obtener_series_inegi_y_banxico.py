@@ -364,8 +364,6 @@ def trimestres_a_anual(df,columns, mapper: dict = mapper):
     trimes = df[columns]
     if not trimes.empty:
         trimes = trimes.dropna().reset_index()
-        #st.write('trimes')
-        #st.write(trimes)
         trimes['fecha'] = trimes['fecha'].apply(lambda x: str(x)[:5] + mapper[ str(x)[5:7]] + str(x)[7:]  ) 
         trimes.fecha = pd.to_datetime(trimes.fecha, format='%Y-%m-%d').dt.date
         return trimes
@@ -590,13 +588,11 @@ if uploaded_file:
       if 'fecha' in df.index.names:
         df.reset_index(inplace=True)
   
-      #df.reset_index(True)
       df['fecha'] = pd.to_datetime(df['fecha'], format='%Y/%m/%d').dt.date
       if not df_diario.empty:
         df_diario['fecha'] = pd.to_datetime(df_diario['fecha']).dt.date
       if not df_trimestral.empty:
         df_trimestral['fecha'] = pd.to_datetime(df_trimestral['fecha'], ).dt.date
-      #df.set_index('fecha', inplace=True)
 
 
 
@@ -616,12 +612,9 @@ if uploaded_file:
 
       
       df.columns = [' '.join(col.strip().split()) for col in df.columns]
-      #st.write('new cols')
-      #st.write(df.columns)
+
 
       rutas_variables_usuario = pd.concat([rutas_variables_usuario_1,rutas_variables_usuario_2])
-      #st.write('rutas_variables')
-      #st.write(rutas_variables_usuario)
       rutas_variables_usuario["NombreVariable"] = [' '.join(col.strip().split()) for col in rutas_variables_usuario["NombreVariable"] ]
       #rutas_variables_usuario = rutas_variables_usuario.set_index('NombreVariable').T[df.columns].T.reset_index()
       #st.write('rutas_variables 2')
@@ -769,7 +762,7 @@ if uploaded_file:
       df.to_excel(writer, sheet_name='Datos', index=True)
       
       # agregamos el df de las series diarias a otra hoja
-      if not df_diario.empty:#not df_diario.empty:
+      if not df_diario.empty:
         df_diario['fecha'] = pd.to_datetime(df_diario['fecha']).dt.date
         df_diario.to_excel(writer, sheet_name='Diarias', index=False)
 
@@ -783,7 +776,7 @@ if uploaded_file:
       writer.sheets['Graficas'] = worksheet
 
       # formato para texto blanco
-      white_text_format = workbook.add_format({'font_color': 'white'})      
+      #white_text_format = workbook.add_format({'font_color': 'white'})      
   
       # Agregamos imagenes
       for i, img_bytes1 in enumerate(imgs_bytes):    
@@ -797,7 +790,7 @@ if uploaded_file:
 
   #     pio.write_excel(fig, excel_file, sheet_name='graficas')
    
-    #df.to_excel(excel_file, index=True, engine='xlsxwriter')
+
     excel_file.seek(0)
     # Descargar el archivo Excel
     st.download_button(

@@ -205,7 +205,7 @@ with col1:
 with col2:
     st.write('Cargar archivos')
 
-    file1 = st.file_uploader("Escoger el archivo de datos anteriores o desactializados (Sólo se admite archivos de Excel .xlsx)",key='a')
+    file1 = st.file_uploader("Escoger el archivo de datos anteriores o desactualizados (Sólo se admite archivos de Excel .xlsx)",key='a')
     st.write("Archivo que seleccionaste: ", "" if file1 is None else file1.name)
 
     file2 = st.file_uploader("Escoger el archivo de los datos nuevos o actualizados (Sólo se admite archivos de Excel .xlsx)",key='b')
@@ -285,7 +285,7 @@ if file1 and file2:
 
 
     fig = px.bar(
-        desc_stats_long,
+        desc_stats_long[desc_stats_long['index'] != 'std'],
         x="index",  # Estadísticas en el eje X
         y="Value",  # Valores en el eje Y
         color="Column",  # Diferenciación por columna (hue)
