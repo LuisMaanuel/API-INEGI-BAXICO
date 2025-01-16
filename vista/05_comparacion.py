@@ -352,7 +352,7 @@ if file1 and file2:
       # Agregamos imagenes
 
       for i, img_bytes1 in enumerate(imgs_bytes):
-        df_img1 = pd.DataFrame() #{'image': [img_bytes1.getvalue()]})
+        df_img1 = pd.DataFrame()#{'image': [img_bytes1.getvalue()]})
         df_img1.to_excel(writer, sheet_name='Graficas', index=False, header=False, startrow=i*15, startcol=0)
         workbook = writer.book
         worksheet = writer.sheets['Graficas']        
