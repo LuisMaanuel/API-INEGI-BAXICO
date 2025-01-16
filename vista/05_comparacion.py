@@ -350,12 +350,13 @@ if file1 and file2:
       df.to_excel(writer, sheet_name='Datos', index=True)
       desc_stats_.rename(columns={'index':'Estadistica'}).to_excel(writer, sheet_name= 'Estadisticas', index=False)
       # Agregamos imagenes
+
       for i, img_bytes1 in enumerate(imgs_bytes):
-        df_img1 = pd.DataFrame({'image': [img_bytes1.getvalue()]})
-        #df_img1.to_excel(writer, sheet_name='Graficas', index=False, header=False, startrow=i*15, startcol=0)
-        
+        df_img1 = pd.DataFrame()#{'image': [img_bytes1.getvalue()]})
+        df_img1.to_excel(writer, sheet_name='Graficas', index=False, header=False, startrow=i*15, startcol=0)
         workbook = writer.book
-        worksheet = writer.sheets['Graficas']
+        worksheet = writer.sheets['Graficas']        
+
         # Crear objetos Image para cada gráfica y agregarlos a la hoja
         worksheet.insert_image(f'A{1 if i==0 else i*26}', 'grafica_linea_{i}.png', {'image_data': img_bytes1})
 
