@@ -58,7 +58,7 @@ st.header("API de :green[INEGI] y :blue[BANXICO]")
 text = '''
 A través de la interfaz se podrá obtener información de variables economicas de [INEGI](https://www.inegi.org.mx/app/indicadores/?tm=0) y [BANXICO](https://www.banxico.org.mx/SieAPIRest/service/v1/doc/catalogoSeries), optimizando la busqueda de las variables de sus sitios de internet. Con esto se busca ahorrar tiempo en las busquedas de series economicas y automatizar el proceso.
 
-La interfaz hace uso de las API's(Application Programming Interface) las cuales se conectan con INEGI y BANXICO para extraer la información, estas API's son proporcionadas por los mismo sitios, por lo que la extracción de informacion es confiable y segura.
+La interfaz hace uso de las API's (Application Programming Interface) las cuales se conectan con INEGI y BANXICO para extraer la información, estas API's son proporcionadas por los mismo sitios, por lo que la extracción de informacion es confiable y segura.
 '''
 
 st.markdown(text)

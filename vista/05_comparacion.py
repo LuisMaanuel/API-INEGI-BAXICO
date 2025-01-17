@@ -142,11 +142,11 @@ st.subheader("Estructura de los datos a subir", divider="orange")
 st.write('''Para un correcto funcionamiento, es importante que ambos archivos excel (.xlsx) **tenga el mismo nombrado de
          las columnas.** Con excepcion del nombre asigando a la columna de la fecha y debe seguir la siguiente estructura:''')
 
-st.write('- La primer columna de ambos archivos debe corresponder a la fecha de los datos. ') 
+st.write('- **La primer columna:** de ambos archivos debe corresponder a la fecha de los datos. ') 
 
-st.write('- la siguiente columna en ambos archivos debe hacer referencia a la misma serie de datos económicos (supongamos PIB).')
-st.write('''- la tercer columna en  ambos archivos hacen referencia a la misma serie de datos económicos (supongamos el precio de venta del dolar)
-            y asi sucesivamente con las demas columnas''')
+st.write('- **La siguiente columna:** en ambos archivos debe hacer referencia a la misma serie de datos económicos (supongamos PIB).')
+st.write('''- **La tercer columna:** en  ambos archivos hacen referencia a la misma serie de datos económicos (supongamos el precio de venta del dolar)
+            y asi sucesivamente con las demas columnas.''')
 
 st.subheader('Ejemplo de estructura de los archivos')
 
@@ -180,6 +180,11 @@ df2.set_index(df2.columns[0],inplace=True)
 
 st.write( df1.subtract(df2))
 
+
+
+st.write('''**OBSERVACION** Si el resultado marca filas con valores nulos (None) quiere decir que los rangos de fechas
+                entre los archivos son distintos, es decir, un archivo si tiene registros en esas fechas pero el otro archivo
+                no, **por lo cual es importante especificar el rango de las fechas**''')
 
 
 
@@ -224,9 +229,7 @@ if file1 and file2:
     df = subtract_two_df(file1, file2,fecha_inicio, fecha_fin)
     st.write('- Resultado')
     st.write(df)
-    st.write('''**OBSERVACION** Si el resultado marca filas con valores nulos (None) quiere decir que los rangos de fechas
-                entre los archivos son distintos, es decir, un archivo si tiene registros en esas fechas pero el otro archivo
-                no, **por lo cual es importante especificar el rango de las fechas**''')
+    
 
 
 
