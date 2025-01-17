@@ -38,4 +38,3 @@ muestra_claves: pd.DataFrame = load_data("./pruebas/inegi-muestra-5claves.xlsx")
 
 
 # 2) Abrir el archivo en modo lectura binaria y guardarlo en cache por si lo vuelve abrir el enlace
-
