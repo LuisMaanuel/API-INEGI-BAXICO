@@ -2,15 +2,8 @@ openpyxl
 INEGIpy
 pyxlsb
 xlsxwriter
-<<<<<<< HEAD
 streamlit
 st-pages
 sie-banxico
 plotly
 kaleido
-=======
-st-pages
-sie-banxico
-plotly
-kaleido
->>>>>>> cd7ac66522ef8f121f05b37250d03fe93460a267
