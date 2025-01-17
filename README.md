@@ -1,4 +1,5 @@
 # API-INEGI-BANXICO
+<<<<<<< HEAD
 **Por: GUILLERMO GERARDO ANDRES URBANO Y LUIS MANUEL GONZALEZ HIDALGO**
 
 ## PROPOSITO
@@ -43,3 +44,5 @@ En esta carpeta se encuentras las vistas o interfaces que son desplegadas cuando
 Contiene los catalogos de las rutas para las series correspondientes a BANXICO e INEGI, los archivos .pkl son los mismos que los archivos excel solo que de esta manera se cargan para obtener las serires ya que es mas facil con .pkl
 
 
+=======
+>>>>>>> cd7ac66522ef8f121f05b37250d03fe93460a267

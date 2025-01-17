@@ -5,7 +5,15 @@ import pickle
 import re 
 from io import BytesIO
 
+@st.cache_data
+def convert_df(df):
+    # IMPORTANT: Cache the conversion to prevent computation on every rerun
+    return df.to_csv().encode('utf-8')
 
+@st.cache_data
+def load_data(url):
+    df = pd.read_excel(url)
+    return df
 
 @st.cache_data
 def load_data_objeto(url):
@@ -14,7 +22,9 @@ def load_data_objeto(url):
         catalogo_inegi = pickle.load(f)
     return catalogo_inegi
 
-
+def eliminar_puntuacion(texto_minuscula):
+    texto_m_sp = re.sub(r'\W+', ' ', texto_minuscula)
+    return texto_m_sp
 
 
 # Titulo principal y pequeña explicación

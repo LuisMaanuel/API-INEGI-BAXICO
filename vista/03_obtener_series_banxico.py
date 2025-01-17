@@ -31,8 +31,6 @@ def load_data_objeto(url):
 catalogo: pd.DataFrame = load_data_objeto('./catalogo/catalogoBANXICO.pkl')
 rutas_variables_usuario = None
 
-
-
 def construir_catalogo(formato: str):
   if formato.strip() == "Rutas":
     columna_formato = "Ruta"
@@ -41,13 +39,10 @@ def construir_catalogo(formato: str):
   tmp = catalogo[["Ruta", "Clave"]].set_index(columna_formato).squeeze()
   return tmp 
 
-
 def obtener_serie(ruta_archivo: str, formato:str, token:str = ""):
   global rutas_variables_usuario
   # Tomamos siempre la primera columna
-  #variables_usuario: pd.Series = pd.read_excel(ruta_archivo).iloc[:,0]
-  archivo = pd.read_excel(ruta_archivo)
-  variables_usuario: pd.Series = archivo.iloc[:,0]
+  variables_usuario: pd.Series = pd.read_excel(ruta_archivo).iloc[:,0]
   # Las claves son cadenas
   # Las rutas seran cadenas
 
@@ -69,7 +64,7 @@ def obtener_serie(ruta_archivo: str, formato:str, token:str = ""):
           st.write(f"Claves que no se puedieron encontrar: {len(variables_usuario)-len(variables_usuario_)}")
        with col2:          
           excel_file = BytesIO()
-          no_encontradas = archivo[-variables_usuario.isin(catalogo_se.index)]
+          no_encontradas = variables_usuario[-variables_usuario.isin(catalogo_se.index)]
           no_encontradas.to_excel(excel_file, index=False, engine='xlsxwriter')
           excel_file.seek(0)
           # Descargar el archivo Excel
@@ -85,35 +80,20 @@ def obtener_serie(ruta_archivo: str, formato:str, token:str = ""):
   if formato == "Rutas":
     #Para cada variable tendremos que sacar su clave y nombre de la variable    
     # En el caso que haya más de dos claves se seleciona la longitud maxima (SOLUCION PROVISIONAL)
+    #st.write(catalogo_se[variables_usuario.iloc[3]])
     # Cada ruta debe debe tener una clave unica
     # Como solucion provisional en el caso tengas más de una clave se toma la primero(ESTO SE DEBE REVISAR PORQUE SE TIENE MÁS DE UNA CLAVE)
     claves_variables =  variables_usuario.apply(lambda x: catalogo_se[x] if  type(catalogo_se[x]) is str else catalogo_se[x].iloc[0])
-    nombres_variables = variables_usuario.apply(lambda x: x.split(">")[-1] if x.split(">")[-1] else x.split(">")[-2])
-    rutas = variables_usuario#.copy()
+    nombres_variables = variables_usuario.apply(lambda x: x.split(">")[-1])
 
   elif formato == "Claves":
     # En esta parte se trata cuando se tiene la misma clave con diferentes rutas
     claves_variables =  variables_usuario
-    nombres_variables = variables_usuario.apply(lambda x: catalogo_se[x] if  type(catalogo_se[x]) is str else catalogo_se[x].iloc[0])
-    rutas = nombres_variables.copy()
     #nombres_variables = variables_usuario.apply(lambda x: catalogo_se[x].split(">")[-1])
     
     # Conservaremos el mismo nombre de la variable
-    #nombres_variables = claves_variables
+    nombres_variables = claves_variables
   
-  if len(archivo.columns) > 1:
-      ## obtenemos los nombres de las columnas en caso de que existan,
-      ## por defecto se estan considerando que los nombres estan en la segunda columna
-      nombres_variables = archivo.iloc[:,1].values
-      nombres_variables = nombres_variables[variables_filtro]
-
-      
-  else:
-      #st.write('nombres_variables',nombres_variables)
-      nombres_variables_ = nombres_variables.apply(lambda x: x.split(">")[-1])
-      #st.write(nombres_variables)
-      # Hace unico los nombres, pero no esta excento que la ruta la pongan dos veces
-      nombres_variables = [str(clave) + ' '+ nombre for clave, nombre in zip(claves_variables, nombres_variables_)]
   # Convertir todo cadena
   claves_variables = claves_variables.astype(str)
 
@@ -123,7 +103,7 @@ def obtener_serie(ruta_archivo: str, formato:str, token:str = ""):
   # Mayor verificacion, quitar los duplicados de la lista si es que existen
   #claves_variables = list(set(claves_variables))
   #nombres_variables = list(set(nombres_variables))
-  rutas_variables_usuario = pd.DataFrame({"RutaCompleta": rutas, "NombreVariable": nombres_variables})
+  rutas_variables_usuario = pd.DataFrame({"RutaCompleta": variables_usuario, "NombreVariable": nombres_variables})
   
   # Uso de la API de BANXICO
   api = SIEBanxico(token = token, id_series = claves_variables.tolist(), language = 'en')
@@ -144,12 +124,8 @@ def obtener_serie(ruta_archivo: str, formato:str, token:str = ""):
 
   # Limpieza del dataframe caso partircula banxico
   for columna in df.columns:
-    df[columna] = df[columna].replace("N/E", np.nan)
+    df[columna].replace("N/E", np.nan, inplace=True)
   return df
-
-
-
-
 
 
 # -------------------------- Interfaz ---------------------------
