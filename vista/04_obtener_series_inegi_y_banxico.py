@@ -527,10 +527,10 @@ if uploaded_file:
       ## encontramos las series bimestrales, trimestrales, cuatrimestrales, semestrales y las ponemos en el formato adecuado
       columns = df.columns.to_list()
       dfs_temporales = []
-      for (cjt, freq, nombre) in [({f'0{i}' if i < 10 else str(i) for i in range(1,31)} , True, 'diaria'), 
-                          ({'01','02','03','04','05','06'}, False, False),
-                          ({'01','02','03','04'}, False, 'trimestral'),
-                          ({'01','02','03'}, False, False), ({'01','02'}, False, False) ]:
+      for (cjt, freq, nombre) in [({f'0{i}' if i < 10 else str(i) for i in range(1,31)} , True, 'Diarias'), 
+                          ({'01','02','03','04','05','06'}, False, 'Semestrales'),
+                          ({'01','02','03','04'}, False, 'Trimestrales'),
+                          ({'01','02','03'}, False, 'Cuatrimestrales'), ({'01','02'}, False, 'Semestrales') ]:
         
         # obtenemos los nombres de las series
         temporales_nombres = get_trimestrales(df[columns], cjt, diaria= freq)
@@ -538,21 +538,14 @@ if uploaded_file:
         columns = [name for name in columns if name not in temporales_nombres]
 
         # si es serie diaria almacenamos el nombre para darle un tratamiento especifico
-        if nombre == 'diaria': 
+        if nombre == 'Diarias': 
           diarias_names = temporales_nombres
-               
 
-        # en caso contrario convertimos las fechas y agregamos el df a una lista
         else:
-          # si es trimestral almacenamos lso nombres
-          if nombre == 'trimestral':
-            trimestrales_name = temporales_nombres
-            df_trimestral = trimestres_a_anual(df, temporales_nombres)
-            dfs_temporales.append( df_trimestral )
+          #trimestrales_name = temporales_nombres
+          df_trimestral = trimestres_a_anual(df, temporales_nombres) if temporales_nombres else pd.DataFrame()
+          dfs_temporales.append( (nombre, df_trimestral) )
 
-          else:
-            df_trimestral = pd.DataFrame()
-            dfs_temporales.append( trimestres_a_anual(df, temporales_nombres) )
       
       if diarias_names:
         df_diario = df[diarias_names].dropna()
@@ -568,11 +561,11 @@ if uploaded_file:
         ultimo_por_mes["fecha"] = pd.to_datetime(ultimo_por_mes["fecha"]).dt.date
 
         # agregamos el df mensualizado a la lista de todos los dfs
-        dfs_temporales.append(ultimo_por_mes)
-        df_diario_exist = True
+        dfs_temporales.append( ('Diarias', ultimo_por_mes))
+
       else:
+        dfs_temporales.append( ('Diarias', pd.DataFrame()) )
         df_diario = pd.DataFrame()
-        df_diario_exist = False
       
       
       # obtenemos un dataframe donde las series existentes son solamente mensuales
@@ -581,7 +574,7 @@ if uploaded_file:
       
 
       # unimos todos los dfs
-      for df_temporal in dfs_temporales:
+      for _, df_temporal in dfs_temporales:
          df = df.merge(df_temporal, how='left',on='fecha') if not df_temporal.empty else df
       
 
@@ -589,10 +582,15 @@ if uploaded_file:
         df.reset_index(inplace=True)
   
       df['fecha'] = pd.to_datetime(df['fecha'], format='%Y/%m/%d').dt.date
+
+      for _, df_temporal in dfs_temporales:
+        if not df_temporal.empty:
+          df_temporal['fecha'] = pd.to_datetime(df_temporal['fecha']).dt.date
+
       if not df_diario.empty:
         df_diario['fecha'] = pd.to_datetime(df_diario['fecha']).dt.date
-      if not df_trimestral.empty:
-        df_trimestral['fecha'] = pd.to_datetime(df_trimestral['fecha'], ).dt.date
+#      if not df_trimestral.empty:
+#        df_trimestral['fecha'] = pd.to_datetime(df_trimestral['fecha'], ).dt.date
 
 
 
@@ -601,11 +599,14 @@ if uploaded_file:
       if fecha_inicio:
 
         df = df[(df.fecha >= fecha_inicio) & (df.fecha <= fecha_fin)]
+
+        for i, (_, df_temporal) in enumerate(dfs_temporales):
+          if not df_temporal.empty:
+            dfs_temporales[i] = (_, df_temporal[(df_temporal.fecha >= fecha_inicio) & (df_temporal.fecha <= fecha_fin)])
+
+
         if not df_diario.empty:
-          df_diario = df_diario[(df_diario.fecha >= fecha_inicio) & (df_diario.fecha <= fecha_fin)]
-  
-        if not df_trimestral.empty:
-          df_trimestral = df_trimestral[(df_trimestral.fecha >= fecha_inicio ) & (df_trimestral.fecha <= fecha_fin) ]
+          df_diario = df_diario[(df_diario.fecha >= fecha_inicio) & (df_diario.fecha <= fecha_fin)]  
   
       df.set_index('fecha', inplace=True)
       df.dropna(inplace=True, how='all')
@@ -761,14 +762,14 @@ if uploaded_file:
       # Agregar el DataFrame a la primera hoja
       df.to_excel(writer, sheet_name='Datos', index=True)
       
+      for name, df_temporal in dfs_temporales:
+        if name != 'Diarias' and not df_temporal.empty:
+          df_temporal.to_excel(writer, sheet_name= name, index=False)
+
       # agregamos el df de las series diarias a otra hoja
       if not df_diario.empty:
         df_diario['fecha'] = pd.to_datetime(df_diario['fecha']).dt.date
         df_diario.to_excel(writer, sheet_name='Diarias', index=False)
-
-      # agregamos el df de las series trimestrales a otra hoja
-      if not df_trimestral.empty:
-        df_trimestral.to_excel(writer, sheet_name='Trimestrales', index=False)
 
 
       workbook = writer.book
