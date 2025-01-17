@@ -1,0 +1,341 @@
+[33mcommit 6de7b29b5b6ed3af97233274610223084680fc7c[m[33m ([m[1;36mHEAD -> [m[1;32mmain[m[33m)[m
+Author: LuisMaanuel <luismanuelgonzalez@ciencias.unam.mx>
+Date:   Fri Jan 17 12:37:45 2025 -0600
+
+    Revirtiendo cambios
+
+[33mcommit 07fdcca0aca6c470026097ffee2e4f2d443ab39c[m
+Author: LuisMaanuel <luismanuelgonzalez@ciencias.unam.mx>
+Date:   Fri Jan 17 12:08:21 2025 -0600
+
+    actulizacion
+
+[33mcommit 4fa8972675f001ec1da8b49725e0288ed84ed772[m
+Author: LuisMaanuel <luismanuelgonzalez@ciencias.unam.mx>
+Date:   Fri Jan 17 12:06:15 2025 -0600
+
+    actulizacion
+
+[33mcommit 0fd55f31159a570fae783edfaf94e524b172f9fc[m
+Merge: 0511fb6 cd7ac66
+Author: LuisMaanuel <luismanuelgonzalez@ciencias.unam.mx>
+Date:   Fri Jan 17 12:01:24 2025 -0600
+
+    Merge branch 'main' of https://github.com/gandres-dev/API-INEGI-BANXICO
+
+[33mcommit 0511fb69252219aed4312a80e3bd7b71e800ee1c[m[33m ([m[1;31mramagerardo/version2[m[33m, [m[1;32mversion2[m[33m)[m
+Author: LuisMaanuel <luismanuelgonzalez@ciencias.unam.mx>
+Date:   Thu Jan 16 18:10:43 2025 -0600
+
+    Actualizando deteccion de series con diferentes frecuencias
+
+[33mcommit aadf021e07c27bf05d407102babd5d0f8679846d[m
+Author: LuisMaanuel <luismanuelgonzalez@ciencias.unam.mx>
+Date:   Thu Jan 16 15:21:35 2025 -0600
+
+    actualizacion de descarga de excel
+
+[33mcommit 5a40391908eb472acae40ecfc6331044ec8dfb92[m
+Author: LuisMaanuel <luismanuelgonzalez@ciencias.unam.mx>
+Date:   Thu Jan 16 15:11:48 2025 -0600
+
+    Corrigiendo codigo para descarga de excel de comparacion
+
+[33mcommit 32e8d06bce16d99c9f93c96c438f128cb742e733[m
+Author: LuisMaanuel <luismanuelgonzalez@ciencias.unam.mx>
+Date:   Thu Jan 16 15:10:15 2025 -0600
+
+    Corrigiendo codigo para descarga de excel de comparacion
+
+[33mcommit 319cb8ff8b1f25d096a8ae6f6f0e410f30c33f4d[m
+Author: LuisMaanuel <luismanuelgonzalez@ciencias.unam.mx>
+Date:   Thu Jan 16 15:08:08 2025 -0600
+
+    Corrigiendo codigo para descarga de excel de comparacion
+
+[33mcommit eb672459fdf3c72473c10b9e585402b7eb765955[m
+Author: LuisMaanuel <152419016+LuisMaanuel@users.noreply.github.com>
+Date:   Thu Jan 16 14:57:29 2025 -0600
+
+    Update 05_comparacion.py
+    
+    Comentado texto innecesario en la descarga de excel
+
+[33mcommit f905b72a27f42c8e62371b9ca5379d55ee517be4[m
+Author: LuisMaanuel <luismanuelgonzalez@ciencias.unam.mx>
+Date:   Wed Jan 15 13:43:52 2025 -0600
+
+    Actualizacion de codigo
+
+[33mcommit 6c69629d133e28e40d6cf748984fcd0518613a1e[m
+Author: LuisMaanuel <luismanuelgonzalez@ciencias.unam.mx>
+Date:   Tue Jan 14 17:48:01 2025 -0600
+
+    Actualizando la deteccion de datos diarios y trimestrales
+
+[33mcommit ccd5f4e155a67d3463753a32c110c32479e185a8[m
+Author: LuisMaanuel <luismanuelgonzalez@ciencias.unam.mx>
+Date:   Tue Jan 14 14:19:27 2025 -0600
+
+    Actualizando codigo para el excel a descargar
+
+[33mcommit f1545d28a49f959028bc3b5a1882d32702669257[m
+Author: LuisMaanuel <luismanuelgonzalez@ciencias.unam.mx>
+Date:   Tue Jan 14 13:44:13 2025 -0600
+
+    Actulizacion en los graficas de la pagina y dentro del excel a descargar
+
+[33mcommit c6e804399983e9e19f9a33b0e448fe42ce8b60de[m
+Author: LuisMaanuel <luismanuelgonzalez@ciencias.unam.mx>
+Date:   Tue Jan 14 12:47:02 2025 -0600
+
+    Comentando una st.write innecesario
+
+[33mcommit 6a8b563ce6d3a25894ae2e646f549eb5a21121d2[m
+Author: LuisMaanuel <luismanuelgonzalez@ciencias.unam.mx>
+Date:   Tue Jan 14 12:45:47 2025 -0600
+
+    Comentando una st.write innecesario
+
+[33mcommit 4f7488ffaf5e1b898309fddbab491723abb2ee04[m
+Author: LuisMaanuel <luismanuelgonzalez@ciencias.unam.mx>
+Date:   Mon Jan 13 16:46:19 2025 -0600
+
+    solucion de error en banxico e inegi y actulizacion de codigo en comparacion
+
+[33mcommit 99f5f0f9d39f46fe92c70db16778c23b1c987662[m
+Author: LuisMaanuel <luismanuelgonzalez@ciencias.unam.mx>
+Date:   Mon Jan 13 15:27:43 2025 -0600
+
+    Creacion de una pestaña con las series trimestrales en excel a descargar
+
+[33mcommit 26776d1df9e4b83ce2304145e80d7e94cf37ba73[m
+Author: LuisMaanuel <luismanuelgonzalez@ciencias.unam.mx>
+Date:   Fri Jan 10 18:13:57 2025 -0600
+
+    Se comentan las secciones exclusivas de INEGI y BANXICO del archivo .toml
+
+[33mcommit 21e0d7ac533370b6900ee79f7b5abebbc679fd39[m
+Author: LuisMaanuel <luismanuelgonzalez@ciencias.unam.mx>
+Date:   Fri Jan 10 18:10:02 2025 -0600
+
+    Se identifican series diarias, obtencion  del ultimo registro y creacion de una hoja en el excel a descargar
+
+[33mcommit e1cdffdcd35fcf27d7b22dbb2ca4fc9baef7d2d2[m
+Author: LuisMaanuel <luismanuelgonzalez@ciencias.unam.mx>
+Date:   Fri Jan 10 12:38:44 2025 -0600
+
+    Añadiendo pestaña de estadisticas en excel a descargar de pestaña de comparacion
+
+[33mcommit 577fee7d313cfce2aa2e24e27cd00155a132092f[m
+Author: LuisMaanuel <luismanuelgonzalez@ciencias.unam.mx>
+Date:   Wed Jan 8 14:30:23 2025 -0600
+
+    actualizacion de documentacion en funciones get_trimestales y trimestres_a_anual
+
+[33mcommit 72265f904524aaa03b00d4ed884ee1fbfcf71cc4[m
+Author: LuisMaanuel <luismanuelgonzalez@ciencias.unam.mx>
+Date:   Wed Jan 8 14:17:39 2025 -0600
+
+    Actualizacion de catalogos y de pestaña de comparacion
+
+[33mcommit e7dabf94df78eb99f15ac56e957014a0b37d11df[m
+Author: LuisMaanuel <luismanuelgonzalez@ciencias.unam.mx>
+Date:   Tue Jan 7 18:21:11 2025 -0600
+
+    Agregando graficas en pestaña de comparacion
+
+[33mcommit e01f8844e811b35d6e89e8e6c7fa3196eb8af15d[m
+Author: LuisMaanuel <luismanuelgonzalez@ciencias.unam.mx>
+Date:   Tue Jan 7 16:31:48 2025 -0600
+
+    Actualizando codigo deteccion de trimestres y en pestaña de comparacion
+
+[33mcommit 12dace29a7c5fe904a057c7b028fa428658a3c1a[m
+Author: LuisMaanuel <luismanuelgonzalez@ciencias.unam.mx>
+Date:   Mon Dec 30 15:42:03 2024 -0600
+
+    Obtencion de series trimestrales en la seccion  BANXICO-INEGI
+
+[33mcommit 18fb7ea7d8c251529fd4fa3c5275ea4277054c19[m
+Author: LuisMaanuel <luismanuelgonzalez@ciencias.unam.mx>
+Date:   Mon Dec 30 13:33:03 2024 -0600
+
+    Agregando funcionalidad para detectar series trimestrales como el PIB
+
+[33mcommit 1cb80483420965c763077c6609209ba4d82608eb[m
+Author: LuisMaanuel <luismanuelgonzalez@ciencias.unam.mx>
+Date:   Mon Dec 23 19:38:27 2024 -0600
+
+    Agragando pestaña de navegacion y estructura deseada
+
+[33mcommit eafd5d8acd6db5978d28a4898d4321b2a836b5eb[m
+Author: LuisMaanuel <luismanuelgonzalez@ciencias.unam.mx>
+Date:   Mon Dec 23 15:41:54 2024 -0600
+
+    Actualizando especificaciones y consideraciones
+
+[33mcommit 5ac4c864620fb6cafaf97ae05316a2f12ed8c1ae[m
+Author: LuisMaanuel <luismanuelgonzalez@ciencias.unam.mx>
+Date:   Mon Dec 23 15:25:03 2024 -0600
+
+    Mostrando las rutas correctas de las series
+
+[33mcommit b39ceb3cd1ce198f4228be7c2c208e3e68f0be06[m
+Author: LuisMaanuel <luismanuelgonzalez@ciencias.unam.mx>
+Date:   Thu Dec 19 15:54:21 2024 -0600
+
+    ordenando las variables obtenidas y  graficas
+
+[33mcommit cecb9445a4e317a08107f31d4ee37409a2d82cf8[m
+Author: LuisMaanuel <luismanuelgonzalez@ciencias.unam.mx>
+Date:   Mon Dec 16 16:24:27 2024 -0600
+
+    Añadiendo ejemplo de la estructura de los datos a ingresar y corrigiendo formato en BANXICO
+
+[33mcommit 8f8c9f20ffec9598c7e2514fe73eca71e79de83c[m
+Author: LuisMaanuel <luismanuelgonzalez@ciencias.unam.mx>
+Date:   Mon Dec 16 13:45:07 2024 -0600
+
+    Agregando la pagina INTRODUCCION
+
+[33mcommit 70639556bf601d194c2cd9fc9b73de1f80e08717[m
+Author: LuisMaanuel <luismanuelgonzalez@ciencias.unam.mx>
+Date:   Fri Dec 13 16:03:21 2024 -0600
+
+    Actualizando interfaz y catalogos
+
+[33mcommit 6a17ad920be805c42487afa74bfabbefdf5acf30[m
+Author: LuisMaanuel <luismanuelgonzalez@ciencias.unam.mx>
+Date:   Fri Dec 13 15:49:23 2024 -0600
+
+    Actualizacion de codigo y catalogos
+
+[33mcommit cd7ac66522ef8f121f05b37250d03fe93460a267[m
+Author: gandres-dev <andres.urbano@comunidad.unam.mx>
+Date:   Fri Feb 2 13:59:12 2024 -0600
+
+    Agregando despliegue de rutas y prevencion en caso de claves y rutas incorrectas
+
+[33mcommit 56f86427c7d78b037797499b007d9b49185e0c8d[m
+Author: gandres-dev <andres.urbano@comunidad.unam.mx>
+Date:   Wed Jan 17 16:59:04 2024 -0600
+
+    Especificando BIE para las series de inegi
+
+[33mcommit 057e5d841478d4a78f95cb784d810e8a1b36aa10[m
+Merge: 08308d4 c8ce10d
+Author: gandres-dev <andres.urbano@comunidad.unam.mx>
+Date:   Tue Jan 16 17:38:54 2024 -0600
+
+    Arreglando los conflictos entre archivos
+
+[33mcommit 08308d4da999d061c03fac45d9969eefbf3e086d[m
+Author: gandres-dev <andres.urbano@comunidad.unam.mx>
+Date:   Tue Jan 16 17:11:41 2024 -0600
+
+    Agregando graficas en el excel y la seccion de banxico
+
+[33mcommit c8ce10dd501457c9474270f569944242b0518c9c[m
+Author: LaraBere <156706862+LaraBere@users.noreply.github.com>
+Date:   Mon Jan 15 16:24:29 2024 -0600
+
+    Update app.py
+
+[33mcommit 671fa0c220adb36ac1e66479e97560fefc9d3c5a[m
+Author: gandres-dev <andres.urbano@comunidad.unam.mx>
+Date:   Wed Jan 10 16:39:18 2024 -0600
+
+    Corrigiendo los archivos de pruebas
+
+[33mcommit 150ad6ce1b3075f383a2f1d4428da756de1055cd[m
+Author: gandres-dev <andres.urbano@comunidad.unam.mx>
+Date:   Wed Jan 10 16:31:16 2024 -0600
+
+    Agregando funcionalidad completa
+
+[33mcommit 622be46a5cb240dd28df42d029cd529898d38607[m
+Author: gandres-dev <andres.urbano@comunidad.unam.mx>
+Date:   Mon Jan 8 16:13:55 2024 -0600
+
+    Corrigiendo abreviacion
+
+[33mcommit 1c42bc0427ad61e35a47e87483a5b8dc064ad9f3[m
+Author: gandres-dev <andres.urbano@comunidad.unam.mx>
+Date:   Mon Jan 8 15:59:01 2024 -0600
+
+    Mejorando la introduccion
+
+[33mcommit 0a60471bf3cdc7ea076647336aef0a5dd4c15249[m
+Author: gandres-dev <andres.urbano@comunidad.unam.mx>
+Date:   Mon Jan 8 14:32:02 2024 -0600
+
+    Agregando funcionalidad para INEGI
+
+[33mcommit 9cc604ebc019a055a3acb8dc3b87a4feb233c94f[m
+Author: gandres-dev <andres.urbano@comunidad.unam.mx>
+Date:   Fri Jan 5 13:08:30 2024 -0600
+
+    Agregando la funcionalidad de exportar en Excel
+
+[33mcommit c693b4b8256c4cb27b9bb8250332abb9a9371755[m
+Author: gandres-dev <andres.urbano@comunidad.unam.mx>
+Date:   Fri Jan 5 13:07:49 2024 -0600
+
+    Agregando funcionalidad por busqueda de mas una palabra
+
+[33mcommit 0d5365d890e38a86399a145db1bdf9b5330304df[m
+Author: gandres-dev <andres.urbano@comunidad.unam.mx>
+Date:   Fri Jan 5 10:40:03 2024 -0600
+
+    Corrigiendo la funcionalidad de busqueda
+
+[33mcommit 4afc754a6d67e5e0f9ca6972b876956e6dd790ab[m
+Author: Guillermo Andrés Urbano <84817124+gandres-dev@users.noreply.github.com>
+Date:   Thu Jan 4 07:46:41 2024 -0600
+
+    Update 04_buscar.py
+    
+    Poniendo keyword como fijo
+
+[33mcommit c3351bca1ba7e0ef5fcc19efb9dc0229b026105a[m
+Author: gandres-dev <andres.urbano@comunidad.unam.mx>
+Date:   Wed Jan 3 21:29:29 2024 -0600
+
+    Se corrigio el performances de la pagina con las series inegi y se agrego la funcionalidad de buscar
+
+[33mcommit 9ee4e31c5bfadef277c86a66f755ed50c08e4dcc[m
+Author: gandres-dev <andres.urbano@comunidad.unam.mx>
+Date:   Wed Jan 3 18:38:14 2024 -0600
+
+    Add catalogoINEGI serializado
+
+[33mcommit f78846d6c6b8cab14980e7ea632b053219c537a9[m
+Author: gandres-dev <andres.urbano@comunidad.unam.mx>
+Date:   Tue Jan 2 21:10:09 2024 -0600
+
+    Add modulo st-pages
+
+[33mcommit 3eb344ebc36bb247e8c2b6a8bc6448c35cb13187[m
+Author: gandres-dev <andres.urbano@comunidad.unam.mx>
+Date:   Tue Jan 2 21:06:07 2024 -0600
+
+    Agregando funcionalidad de buscar info inegi
+
+[33mcommit a88d88954fa7c1d60f172e7037adb5fb8ae6ebab[m
+Author: gandres-dev <andres.urbano@comunidad.unam.mx>
+Date:   Fri Dec 29 09:34:24 2023 -0600
+
+    Agregando las dependencias que necesitara
+
+[33mcommit ced3c5c69988150d2ca174e47ba2a0f293cda76c[m
+Author: gandres-dev <andres.urbano@comunidad.unam.mx>
+Date:   Fri Dec 29 09:23:27 2023 -0600
+
+    Add examples
+
+[33mcommit 9d9ffe0eb6336f536ecfec7209edb7bdd27b728c[m
+Author: gandres-dev <andres.urbano@comunidad.unam.mx>
+Date:   Thu Dec 28 20:55:04 2023 -0600
+
+    add readme
