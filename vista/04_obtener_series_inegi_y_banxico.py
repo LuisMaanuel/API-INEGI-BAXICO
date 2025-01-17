@@ -396,7 +396,7 @@ st.subheader("Estructura de los datos a subir", divider="orange")
 st.write('Para un correcto funcionamiento, es importante que el archivo excel (.xlsx) tenga la siguiente estructura.')
 
 
-st.markdown('- **Primer columa**: corresponde a la clave o ruta (todas deben de ser claves o rutas) de la serie a descargar')
+st.markdown('- **Primer columa**: corresponde a la clave o ruta (todas deben de ser claves o rutas) de la serie a descargar.')
 st.markdown('- **Segunda columna**: indica si la serie es de BANXICO o INEGI. Es importante especificar de que fuente se debe extraer la serie.')
 st.markdown('''- **Tercer columna**: es el nombre deseado para dicha serie, **la cual opcional pero recomendable**. Si se estan subiendo datos sin esta columna se 
                 asignara por defecto la clave y nombre de la serie, lo cual por la clave se asegura que aunque dos series se llamen igual (indice general) 
