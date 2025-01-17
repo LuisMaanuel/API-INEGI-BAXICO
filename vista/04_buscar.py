@@ -22,6 +22,7 @@ def load_data_objeto(url):
         catalogo_inegi = pickle.load(f)
     return catalogo_inegi
 
+
 def eliminar_puntuacion(texto_minuscula):
     texto_m_sp = re.sub(r'\W+', ' ', texto_minuscula)
     return texto_m_sp
