@@ -39,6 +39,10 @@ def load_data_objeto(url):
     return catalogo_inegi
 
 
+rutas_variables_usuario_1 = pd.DataFrame()
+rutas_variables_usuario_2 = pd.DataFrame()
+
+
 ## obtener serie INEGI
 catalogo_INEGI: pd.DataFrame = load_data_objeto('./catalogo/catalogoINEGI.pkl')
 def construir_catalogo(formato: str):
@@ -52,7 +56,7 @@ def construir_catalogo(formato: str):
 
 def obtener_serie_INEGI(ruta_archivo: pd.DataFrame, formato:str, token:str = "f6a7b69c-5c48-bf0c-b191-5ca98c6a6cc0"):
   global rutas_variables_usuario_1
-  
+
   # archivo = pd.read_excel(ruta_archivo)
   archivo = ruta_archivo
   # Tomamos siempre la primera columna
@@ -510,13 +514,14 @@ if uploaded_file:
       ##############
       ############## obtencion de series de INEGI
       ##############
-      df_inegi = obtener_serie_INEGI(data_inegi, formato_excel, token_INEGI) #if not data_inegi.empty() else None
+      df_inegi = obtener_serie_INEGI(data_inegi, formato_excel, token_INEGI) if not data_inegi.empty else pd.DataFrame()
 
       ##############
       ############## obtencion de series de BANXICO
       ##############
-
-      df_banxico = obtener_serie_BANXICO(data_banxico, formato_excel, token_BANXICO) #if not data_banxico.empty() else None
+      st.write('data_banxico')
+      st.write(data_banxico)
+      df_banxico = obtener_serie_BANXICO(data_banxico, formato_excel, token_BANXICO) if not data_banxico.empty else pd.DataFrame()
 
 
       ## se juntan los datos de inegi y banxico
@@ -614,8 +619,14 @@ if uploaded_file:
       
       df.columns = [' '.join(col.strip().split()) for col in df.columns]
 
+      if not (rutas_variables_usuario_1.empty or rutas_variables_usuario_2.empty):
+        rutas_variables_usuario = pd.concat([rutas_variables_usuario_1,rutas_variables_usuario_2])
+      elif not rutas_variables_usuario_1.empty:
+        rutas_variables_usuario = rutas_variables_usuario_1
+      else:
+        rutas_variables_usuario = rutas_variables_usuario_2
 
-      rutas_variables_usuario = pd.concat([rutas_variables_usuario_1,rutas_variables_usuario_2])
+
       rutas_variables_usuario["NombreVariable"] = [' '.join(col.strip().split()) for col in rutas_variables_usuario["NombreVariable"] ]
       #rutas_variables_usuario = rutas_variables_usuario.set_index('NombreVariable').T[df.columns].T.reset_index()
       #st.write('rutas_variables 2')
@@ -623,7 +634,9 @@ if uploaded_file:
 
       ## selecionamos las variables en el orden que fueron proporcionadas
       if len(data.columns) > 2: # caso en el que los nombres de las variables fueron proporcionadas
-         df = df[data[data.columns[-1]].values]
+
+        df = df[ [col for col in data[data.columns[-1]].values if col in df.columns] ]
+        #df = df[data[data.columns[-1]].values]
       
       else: # caso en el que  no fueron proporcionadas las variables
         
