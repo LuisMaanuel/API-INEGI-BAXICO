@@ -519,8 +519,9 @@ if uploaded_file:
       ##############
       ############## obtencion de series de BANXICO
       ##############
-      st.write('data_banxico')
-      st.write(data_banxico)
+      
+      #st.write('data_banxico')
+      #st.write(data_banxico)
       df_banxico = obtener_serie_BANXICO(data_banxico, formato_excel, token_BANXICO) if not data_banxico.empty else pd.DataFrame()
 
 
