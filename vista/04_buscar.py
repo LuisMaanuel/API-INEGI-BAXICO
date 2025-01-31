@@ -49,7 +49,7 @@ elif selected_variable == "BANXICO":
    #st.write(catalogo.shape)
 
 # Configuracion para indicarle el numero maxiclo filas a mostrar del dataframe
-pd.set_option("styler.render.max_elements", catalogo.shape[0]*10)
+pd.set_option("styler.render.max_elements", 2754818)
 
 keyword = st.text_input('Escribir palabra', placeholder='Ej. aluminio')
 st.write("Palabra escrita:", keyword)
@@ -102,12 +102,13 @@ def buscar_rutas(keyword:str):
   if ',' in keyword:
     # Contiene más de 2 malabras
     list_keywords = keyword.split(",")
-    busqueda_se: pd.Series = catalogo["Variables"].apply(lambda frase_completa: estan_oracion(frase_completa, list_keywords))
+    busqueda_se = catalogo[['Claves', 'Variables']]
+    busqueda_se["Variables"] = busqueda_se["Variables"].apply(lambda frase_completa: estan_oracion(frase_completa, list_keywords))
   else:
     # Contiene una palabra
     busqueda_se: pd.Series = catalogo["Variables"].apply(lambda frase_completa: estan_oracion(frase_completa, [keyword]))
   indices_busqueda = busqueda_se[busqueda_se].index
-  return catalogo.iloc[indices_busqueda][["Variables"]]
+  return catalogo.iloc[indices_busqueda][['Claves',"Variables"]]
 
 # Función de formato que acepta argumentos adicionales
 def colorear_celda(value, keyword):   
@@ -142,13 +143,14 @@ if keyword != "":
   # Buscamos en la cadena completa que este la keyword 
   keyword = keyword.lower().strip()
   data_keyword: pd.DataFrame = buscar_rutas(keyword)
-  #st.write(data_keyword)
   # 2) Despues por nivel
-  rutas_separadas: pd.DataFrame = data_keyword["Variables"].str.split('>', expand=True)
-      
+  claves, rutas_separadas = data_keyword['Claves'] , data_keyword["Variables"].str.split('>', expand=True)
+
   # Aplicar la función de formato con argumentos adicionales usando applymap
   #styled_df = rutas_separadas.style.applymap(colorear_celda)
-  styled_df = rutas_separadas.style.map(lambda value: colorear_celda(value, keyword))
+  
+  styled_df = pd.concat([claves, rutas_separadas],axis=1).set_index('Claves')
+  styled_df = styled_df.style.map(lambda value: colorear_celda(value, keyword))
   st.subheader("Rutas encontradas", divider="blue")
   st.dataframe(styled_df)
   
@@ -169,7 +171,7 @@ if keyword != "":
   st.download_button(
     label="Descargar rutas Excel 📥",
     data=excel_file,
-    file_name='rutas_usuario_inegi.xlsx',
+    file_name='rutas_encontradas.xlsx',
     key='download_button'
     )
 
