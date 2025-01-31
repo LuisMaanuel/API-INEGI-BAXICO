@@ -298,10 +298,11 @@ def obtener_serie_BANXICO(ruta_archivo: pd.DataFrame, formato:str, token:str = "
   df['fecha'] = pd.to_datetime(df['fecha'], dayfirst=True).dt.date#.strftime('%Y-%m')
   df.sort_values(by='fecha' ,axis=0, inplace=True)
   #df.set_index('fecha', inplace=True)
+  #st.write('df')
+  #st.write(df)
   for col in df.columns:
      if col != 'fecha':
-        df[col] = df[col].astype(float)
-
+        df[col] = df[col].replace(',','',regex=True).astype(float)
   return df
 
 
