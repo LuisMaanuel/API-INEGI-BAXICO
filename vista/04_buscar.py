@@ -49,7 +49,7 @@ elif selected_variable == "BANXICO":
    #st.write(catalogo.shape)
 
 # Configuracion para indicarle el numero maxiclo filas a mostrar del dataframe
-pd.set_option("styler.render.max_elements", 2754818)
+pd.set_option("styler.render.max_elements", catalogo.shape[0]*10)
 
 keyword = st.text_input('Escribir palabra', placeholder='Ej. aluminio')
 st.write("Palabra escrita:", keyword)
