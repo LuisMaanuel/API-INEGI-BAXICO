@@ -108,6 +108,9 @@ def buscar_rutas(keyword:str):
     # Contiene una palabra
     busqueda_se: pd.Series = catalogo["Variables"].apply(lambda frase_completa: estan_oracion(frase_completa, [keyword]))
   indices_busqueda = busqueda_se[busqueda_se].index
+  catalogo.rename({'Clave':'Claves'}, inplace=True , axis=1)
+ # st.write('catalogo')
+  #st.write(catalogo.iloc[indices_busqueda])
   return catalogo.iloc[indices_busqueda][['Claves',"Variables"]]
 
 # Función de formato que acepta argumentos adicionales
@@ -150,7 +153,12 @@ if keyword != "":
   #styled_df = rutas_separadas.style.applymap(colorear_celda)
   
   styled_df = pd.concat([claves, rutas_separadas],axis=1).set_index('Claves')
+
+  if not styled_df.index.is_unique:
+   styled_df = styled_df.reset_index()
+
   styled_df = styled_df.style.map(lambda value: colorear_celda(value, keyword))
+
   st.subheader("Rutas encontradas", divider="blue")
   st.dataframe(styled_df)
   
