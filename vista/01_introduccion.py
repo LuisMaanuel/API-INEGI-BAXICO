@@ -49,14 +49,14 @@ catalogo_banxico: pd.DataFrame =  load_data_objeto('./catalogo/catalogoBANXICO.p
 st.title(":red[Dirección de Metodologías y Modelos de Riesgos]")
 text = """
 Para el desarrollo de diversos proyectos y modelos se ha requeridos información macroeconómica que emiten diversas entidades como
-el [Instituto Nacional de Estadística y Geografía](https://www.inegi.org.mx/default.html) (INEGI) y el [Banco de México](https://www.banxico.org.mx) (BANXICO). Ante la necesidad de poder consultar información de manera rápida y eficiente se propuso crear una interfaz para la recolección de información de manera automatizada.
+el [Instituto Nacional de Estadística y Geografía](https://www.inegi.org.mx/default.html) (INEGI) y el [Banco de México](https://www.banxico.org.mx) (BANXICO). Ante la necesidad de poder consultar información de manera rápida y eficiente se creó la presente interfaz para la recolección de información de manera automatizada.
 """
 
 st.write(text)
 
 st.header("API de :green[INEGI] y :blue[BANXICO]")
 text = '''
-A través de la interfaz se podrá obtener información de variables economicas de [INEGI](https://www.inegi.org.mx/app/indicadores/?tm=0) y [BANXICO](https://www.banxico.org.mx/SieAPIRest/service/v1/doc/catalogoSeries), optimizando la busqueda de las variables de sus sitios de internet. Con esto se busca ahorrar tiempo en las busquedas de series economicas y automatizar el proceso.
+A través de la interfaz se puede obtener información de variables economicas de [INEGI](https://www.inegi.org.mx/app/indicadores/?tm=0) y [BANXICO](https://www.banxico.org.mx/SieAPIRest/service/v1/doc/catalogoSeries), optimizando la búsqueda de las variables de sus sitios de internet. Con esto se logró ahorrar tiempo en las búsquedas de series económicas y automatizar el proceso.
 
 La interfaz hace uso de las API's (Application Programming Interface) las cuales se conectan con INEGI y BANXICO para extraer la información, estas API's son proporcionadas por los mismo sitios, por lo que la extracción de informacion es confiable y segura.
 '''
@@ -129,14 +129,14 @@ st.write(text)
 
 st.subheader("Búsqueda por rutas")
 text = """
-Para obtener información de las variables con esta estructura debe indicarse la ruta que se debe seguir para obtener la variable y así sucesivamente para cada variables. Ejemplo:
+Para obtener información de las variables por ruta debe indicarse en cada fila la ruta que se debe seguir para buscar cada variable deseada. Ejemplo:
 """
 st.write(text)
 st.write(muestra_rutas)
 
 st.subheader("Búsqueda por claves")
 text = """
-Para obtener información de las variables con esta estructura debe indicar sólo la clave de las variables a buscar. Ejemplo:
+Para obtener información de las variables por claves debe indicarse en cada fila la clave de las variables a buscar. Ejemplo:
 """
 st.write(text)
 st.write(muestra_claves)
@@ -144,7 +144,8 @@ st.write(muestra_claves)
 
 st.subheader("Catálogos")
 text = """
-Dejamos a tu disposición un catálogo de todos los indicadores que recolectamos con la ruta de cada variable con su respectiva clave unica con la finalidad que puede ser más facil estructurar sus archivos con los formatos especificados. 
+A continuación, se muestran dos catálogos que incluyen la ruta y clave de todos los indicadores recolectados del portal de INEGI y BANXICO con la finalidad que sea más fácil
+estructurar los archivos de consulta con los formatos especificados.
 """
 st.write(text)
 

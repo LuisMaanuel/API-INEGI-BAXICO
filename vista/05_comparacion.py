@@ -132,7 +132,7 @@ with st.sidebar:
 st.title("Comparacion de datos 🆚")
 
 st.write('''Esta sección tiene la finalidad de comparar dos marcos de datos o _dataframes_, uno de ellos contiene los datos 
-         que ya se tenian con anterioridad (en caso de exista) y otro con nuevos datos obtenidos por esta misma plataforma.
+         que ya se tenían (en caso de existan) y otro con nuevos datos obtenidos por esta misma plataforma.
          Ya que al realizar una consulta y obtener nuevos datos pueden existir ciertas discrepancias entre datos anteriores y
          los nuevos, esto es debido a que INEGI y BANXICO actualizan sus series existentes para proporcionar informacion mas 
          certera.''')
@@ -182,10 +182,9 @@ st.write( df1.subtract(df2))
 
 
 
-st.write('''**OBSERVACION** Si el resultado marca filas con valores nulos (None) quiere decir que los rangos de fechas
-                entre los archivos son distintos, es decir, un archivo si tiene registros en esas fechas pero el otro archivo
-                no, **por lo cual es importante especificar el rango de las fechas**''')
-
+st.write('''**OBSERVACION** Si el resultado muestra filas con valores nulos (None) esto indica que los rangos de fechas
+                entre los archivos son distintos. Es decir, un archivo tiene registros en esas fechas, pero el otro
+                no. **Por lo tanto, es importante especificar el rango de las fechas.**''')
 
 
 # -----------------------------
@@ -203,7 +202,7 @@ with col1:
     st.write('Tu fecha escrita fue:', fecha_inicio)
 
     fecha_fin = st.date_input('Fecha final', value=datetime.now(), min_value=datetime(1990,1,1), format='DD/MM/YYYY')
-    st.write('Tu fecha esscrita fue:', fecha_fin)
+    st.write('Tu fecha escrita fue:', fecha_fin)
 
 
 
