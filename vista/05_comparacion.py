@@ -455,13 +455,6 @@ if file1 and file2:
         df_img1 = pd.DataFrame() #{'image': [img_bytes1.getvalue()]})
         df_img1.to_excel(writer, sheet_name='Graficas', index=False, header=False, startrow=i*15, startcol=0)
         workbook = writer.book
-        
-        #df1.to_excel(writer, sheet_name='Datos_df1', index=False)
-        #df2.to_excel(writer, sheet_name='Datos_df2', index=False)
-        #df.to_excel(writer, sheet_name='Datos_df', index=False)
-
-
-        workbook = writer.book
         worksheet = writer.sheets['Graficas']        
 
         for i, img_bytes in enumerate(imgs_bytes):
