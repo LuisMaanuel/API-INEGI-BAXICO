@@ -8,6 +8,7 @@ from sie_banxico import SIEBanxico
 from datetime import datetime
 import plotly.express as px
 import plotly.io as pio
+import plotly.graph_objects as go
 
 
 @st.cache_data
@@ -72,7 +73,7 @@ def subtract_two_df(ruta1: pd.DataFrame = None, ruta2: pd.DataFrame = None,
     df1.set_index(df1.columns[0],inplace=True)
     df2.set_index(df2.columns[0],inplace=True)
 
-    return df1.subtract(df2)#.abs()
+    return (df2.subtract(df1) ).div(df1), df1, df2
 
 
 
@@ -160,7 +161,7 @@ df2 = load_excel('./catalogo/comparacion/datos_nuevos.xlsx')
 df2[df2.columns[0]] = df2[df2.columns[0]].apply(lambda x: str(x)[:10])
 st.write(df2)
 
-st.write('- Resultado')
+st.write('- Resultado, diferencia porcentual.')
 
 
 formato_1 = infer_format(df1.iloc[0,0])
@@ -178,7 +179,7 @@ except:
 df1.set_index(df1.columns[0],inplace=True)
 df2.set_index(df2.columns[0],inplace=True)
 
-st.write( df1.subtract(df2))
+st.write( (df2.subtract(df1)).div(df1) )
 
 
 
@@ -225,8 +226,8 @@ with col2:
 
 
 if file1 and file2:
-    df = subtract_two_df(file1, file2,fecha_inicio, fecha_fin)
-    st.write('- Resultado')
+    df, df1, df2 = subtract_two_df(file1, file2,fecha_inicio, fecha_fin)
+    st.write('- Resultado, diferencia porcentual.')
     st.write(df)
     
 
@@ -308,31 +309,71 @@ if file1 and file2:
 
 
     # -----------------------------             historico
-    st.subheader('Historicos',divider='orange')
+    st.subheader('Históricos',divider='orange')
     selected_variable = st.selectbox('Selecciona la variable a graficar:', df.columns)
     # Crear y mostrar la gráfica de líneas
-    df_sin_nans = df[selected_variable].dropna()
+    # Eliminar valores NaN
+    df1_sin_nans = df1[selected_variable].dropna().reset_index()
+    df2_sin_nans = df2[selected_variable].dropna().reset_index()
+    df_sin_nans = df[selected_variable].dropna().reset_index()
 
-    fig = px.line(df_sin_nans, y=selected_variable) #title=" ".join(selected_variable.split(" ")[1:]))
-    # Agregar el subtítulo mediante annotations
+
+    # Crear figura
+    fig = go.Figure()
+    
+    # Línea para df1 (rojo)
+    fig.add_trace(go.Scatter(
+        x=df1_sin_nans[df1_sin_nans.columns[0]],
+        y=df1_sin_nans[selected_variable],
+        mode='lines',
+        name='Tipo de cambio MXN peso - USD (pesos por dólar)_2025',
+        line=dict(color='red')
+    ))
+
+
+    # Línea para df2 (azul)
+    fig.add_trace(go.Scatter(
+        x=df2_sin_nans[df2_sin_nans.columns[0]],
+        y=df2_sin_nans[selected_variable],
+        mode='lines',
+        name='Tipo de cambio MXN peso - USD (pesos por dólar)',
+        line=dict(color='blue')
+    ))
+
+    # Barras para df (gris) en el segundo eje
+    fig.add_trace(go.Bar(
+        x= df_sin_nans[df_sin_nans.columns[0]],
+        y= df_sin_nans[selected_variable],
+        name='Dif',
+        marker_color='gray',
+        yaxis='y2'
+    ))
+
+    # Configuración del layout
     fig.update_layout(
-        annotations = [
-            dict(
-                x=0.0,  # Posición en el eje X (0.5 = centrado)
-                y=1.21 - (0.05*(i+1)),  # Posición en el eje Y (negativo para colocarlo debajo del título principal)
-                xref="paper",
-                yref="paper",
-                text='',
-                showarrow=False,
-                font=dict(size=14)  # Tamaño de fuente del subtítulo
-        )
-        for i, nombre in enumerate(df.columns)
-      ]
+        title= f'Histórico de {selected_variable} y diferencias porcentuales.',
+        xaxis=dict(title='Fecha'),
+        yaxis=dict(title= f'Histórico de {selected_variable}', side='left'),
+        yaxis2=dict(
+            title='Diferencias (%)',
+            overlaying='y',
+            side='right',
+            showgrid=False
+        ),
+        # edicion del cuadro de las leyendas del grafico
+        legend=dict(
+                x=0.5,  # centrado horizontalmente
+                y=-0.3,  # posicion debajo del gráfico
+                xanchor='center',
+                yanchor='top',
+                orientation='h'  # Leyenda en horizontal
+            ),
+        #margin=dict(b=80)
     )
 
+
+    #fig.show()
     st.plotly_chart(fig)
-    
-    
 
     
     st.subheader("Descargar variables", divider="orange")
