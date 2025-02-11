@@ -383,7 +383,7 @@ if file1 and file2:
     # Obtenemos todas sus graficas
     imgs_bytes = []
     #df1.reset_index(inplace=True)
-    st.write(df1.columns)
+    #st.write(df1.columns)
     for i, col in enumerate(df1.columns):       
         fig = go.Figure()
         
