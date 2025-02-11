@@ -315,7 +315,7 @@ if file1 and file2:
     # Eliminar valores NaN
     df1_sin_nans = df1[selected_variable].dropna().reset_index()
     df2_sin_nans = df2[selected_variable].dropna().reset_index()
-    df_sin_nans = df[selected_variable].dropna().reset_index()
+    df_sin_nans = df[selected_variable].dropna().reset_index()    
 
 
     # Crear figura
@@ -326,7 +326,7 @@ if file1 and file2:
         x=df1_sin_nans[df1_sin_nans.columns[0]],
         y=df1_sin_nans[selected_variable],
         mode='lines',
-        name='Tipo de cambio MXN peso - USD (pesos por dólar)_2025',
+        name='Datos anteriores',
         line=dict(color='red')
     ))
 
@@ -336,7 +336,7 @@ if file1 and file2:
         x=df2_sin_nans[df2_sin_nans.columns[0]],
         y=df2_sin_nans[selected_variable],
         mode='lines',
-        name='Tipo de cambio MXN peso - USD (pesos por dólar)',
+        name='Datos nuevos',
         line=dict(color='blue')
     ))
 
@@ -344,7 +344,7 @@ if file1 and file2:
     fig.add_trace(go.Bar(
         x= df_sin_nans[df_sin_nans.columns[0]],
         y= df_sin_nans[selected_variable],
-        name='Dif',
+        name='Diferencia porcentual',
         marker_color='gray',
         yaxis='y2'
     ))
@@ -355,7 +355,7 @@ if file1 and file2:
         xaxis=dict(title='Fecha'),
         yaxis=dict(title= f'Histórico de {selected_variable}', side='left'),
         yaxis2=dict(
-            title='Diferencias (%)',
+            title='Diferencias porcentuales (%)',
             overlaying='y',
             side='right',
             showgrid=False
@@ -379,13 +379,68 @@ if file1 and file2:
     st.subheader("Descargar variables", divider="orange")
     # Crearemos un archivo de Excel con BytesIO (Para cargarlo en memoria)
     excel_file = BytesIO()
-   
+    
     # Obtenemos todas sus graficas
     imgs_bytes = []
-    for i, col in enumerate(df.columns):       
-        fig_ = px.line(df[col].dropna(), y=col,  title=" ".join(col.split(" ")[1:]))
-        imgs_bytes.append(BytesIO())
-        fig_.write_image(imgs_bytes[i], format='png')
+    #df1.reset_index(inplace=True)
+    st.write(df1.columns)
+    for i, col in enumerate(df1.columns):       
+        fig = go.Figure()
+        
+        # Línea para df1 (rojo)
+        df1_sin_nans = df1[col].dropna().reset_index()
+        df2_sin_nans = df2[col].dropna().reset_index()
+        df_sin_nans = df[col].dropna().reset_index()
+        fig.add_trace(go.Scatter(
+            x=df1_sin_nans[df1_sin_nans.columns[0]],
+            y=df1_sin_nans[col],
+            mode='lines',
+            name='Datos anteriores',
+            line=dict(color='red')
+        ))
+
+        # Línea para df2 (azul)
+        fig.add_trace(go.Scatter(
+            x=df2_sin_nans[df2_sin_nans.columns[0]],
+            y=df2_sin_nans[col],
+            mode='lines',
+            name='Datos nuevos',
+            line=dict(color='blue')
+        ))
+
+        # Barras para df (gris) en el segundo eje
+        fig.add_trace(go.Bar(
+            x= df_sin_nans[df_sin_nans.columns[0]],
+            y= df_sin_nans[col],
+            name='Dif',
+            marker_color='gray',
+            yaxis='y2'
+        ))
+
+        # Configurar ejes
+        fig.update_layout(
+            title=f'Histórico de {col} y diferencias porcentuales.',
+            xaxis=dict(title='Fecha'),
+            yaxis=dict(title = f'Histórico de {col}', side='left'),
+            yaxis2=dict(
+                title='Diferencias porcentuales (%)',
+                overlaying='y',
+                side='right',
+                showgrid=False
+            ),
+            legend=dict(
+                x=0.5, y=-0.3, xanchor='center', yanchor='top', orientation='h'
+            ),
+            margin=dict(b=80)
+        )
+
+
+        #guardar las imagenes
+        img_bytes = BytesIO()
+        fig.write_image(img_bytes, format='png')
+        imgs_bytes.append(img_bytes)
+
+
 
    # Crear un objeto pd.ExcelWriter que escribe en el objeto BytesIO
     with pd.ExcelWriter(excel_file, engine='xlsxwriter') as writer:
@@ -395,18 +450,28 @@ if file1 and file2:
       # Agregamos imagenes
 
       for i, img_bytes1 in enumerate(imgs_bytes):
+
         df_img1 = pd.DataFrame() #{'image': [img_bytes1.getvalue()]})
         df_img1.to_excel(writer, sheet_name='Graficas', index=False, header=False, startrow=i*15, startcol=0)
         workbook = writer.book
+        
+        df1.to_excel(writer, sheet_name='Datos_df1', index=False)
+        df2.to_excel(writer, sheet_name='Datos_df2', index=False)
+        df.to_excel(writer, sheet_name='Datos_df', index=False)
+
+
+        workbook = writer.book
         worksheet = writer.sheets['Graficas']        
 
-        # Crear objetos Image para cada gráfica y agregarlos a la hoja
-        worksheet.insert_image(f'A{1 if i==0 else i*26}', 'grafica_linea_{i}.png', {'image_data': img_bytes1})
+        for i, img_bytes in enumerate(imgs_bytes):
+            df_img = pd.DataFrame()
+            df_img.to_excel(writer, sheet_name='Graficas', index=False, header=False, startrow=i*30, startcol=0)
+            worksheet.insert_image(f'A{1 if i==0 else i*26}', f'Grafica_{i}.png', {'image_data': img_bytes})
 
-  #     pio.write_excel(fig, excel_file, sheet_name='graficas')
-   
-    #df.to_excel(excel_file, index=True, engine='xlsxwriter')
+
     excel_file.seek(0)
+
+    
     # Descargar el archivo Excel
     st.download_button(
         label="Descargar variables Excel 📥",
