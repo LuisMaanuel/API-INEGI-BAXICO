@@ -57,7 +57,7 @@ st.write("Palabra escrita:", keyword)
 
 with st.expander("__Ver guía de uso (opcional)__"):
    texto = """
-- Se puede utilizar una palabra para la busqueda.
+- Se puede utilizar una palabra para la búsqueda.
 
 > Ej. Desempleo
 
@@ -67,7 +67,7 @@ Esto buscará todas las rutas con la palabra desempleo.
     
  > Ej. Desempleo, mujeres
 
-Esto buscará todas las rutas donde se encuentre desempleo y muejeres."""
+Esto buscará todas las rutas donde se encuentre desempleo y mujeres."""
    st.write(texto)
 
 

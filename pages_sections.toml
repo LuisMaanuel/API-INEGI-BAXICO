@@ -1,6 +1,6 @@
 [[pages]]
 path = "vista/01_introduccion.py"
-name = "INTRODUCCION"
+name = "INTRODUCCIÓN"
 icon = "🏠"
 
 #[[pages]]
@@ -20,7 +20,7 @@ icon = "📙"
 
 [[pages]]
 path = "vista/05_comparacion.py"
-name = "COMPARACION DE DATOS"
+name = "COMPARACIÓN DE DATOS"
 icon = "🆚"
 
 [[pages]]

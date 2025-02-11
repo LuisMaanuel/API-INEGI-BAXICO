@@ -129,24 +129,24 @@ with st.sidebar:
 # -----------------------------
 
 
-st.title("Comparacion de datos 🆚")
+st.title("Comparación de datos 🆚")
 
 st.write('''Esta sección tiene la finalidad de comparar dos marcos de datos o _dataframes_, uno de ellos contiene los datos 
          que ya se tenían (en caso de existan) y otro con nuevos datos obtenidos por esta misma plataforma.
          Ya que al realizar una consulta y obtener nuevos datos pueden existir ciertas discrepancias entre datos anteriores y
-         los nuevos, esto es debido a que INEGI y BANXICO actualizan sus series existentes para proporcionar informacion mas 
+         los nuevos, esto es debido a que INEGI y BANXICO actualizan sus series existentes para proporcionar información más 
          certera.''')
 
 # Estructura de los datos a subir
 st.subheader("Estructura de los datos a subir", divider="orange")
-st.write('''Para un correcto funcionamiento, es importante que ambos archivos excel (.xlsx) **tenga el mismo nombrado de
-         las columnas.** Con excepcion del nombre asigando a la columna de la fecha y debe seguir la siguiente estructura:''')
+st.write('''Para un correcto funcionamiento, es importante que ambos archivos excel (.xlsx) **tengan el mismo nombrado en
+         las columnas.** Con excepción del nombre asignado a la columna de la fecha y debe seguir la siguiente estructura:''')
 
-st.write('- **La primer columna:** de ambos archivos debe corresponder a la fecha de los datos. ') 
+st.write('- **La primer columna** de ambos archivos debe corresponder a la fecha de los datos. ') 
 
 st.write('- **La siguiente columna:** en ambos archivos debe hacer referencia a la misma serie de datos económicos (supongamos PIB).')
-st.write('''- **La tercer columna:** en  ambos archivos hacen referencia a la misma serie de datos económicos (supongamos el precio de venta del dolar)
-            y asi sucesivamente con las demas columnas.''')
+st.write('''- **La tercer columna:** en  ambos archivos hacen referencia a la misma serie de datos económicos (supongamos el precio de venta del dólar)
+            y así sucesivamente con las demás columnas.''')
 
 st.subheader('Ejemplo de estructura de los archivos')
 
@@ -182,7 +182,7 @@ st.write( df1.subtract(df2))
 
 
 
-st.write('''**OBSERVACION** Si el resultado muestra filas con valores nulos (None) esto indica que los rangos de fechas
+st.write('''**OBSERVACIÓN** Si el resultado muestra filas con valores nulos (None) esto indica que los rangos de fechas
                 entre los archivos son distintos. Es decir, un archivo tiene registros en esas fechas, pero el otro
                 no. **Por lo tanto, es importante especificar el rango de las fechas.**''')
 
@@ -192,7 +192,7 @@ st.write('''**OBSERVACION** Si el resultado muestra filas con valores nulos (Non
 # -----------------------------
 
 
-st.subheader('Configuracion inicial',divider='orange')
+st.subheader('Configuración inicial',divider='orange')
 
 
 col1, col2 = st.columns(2)
